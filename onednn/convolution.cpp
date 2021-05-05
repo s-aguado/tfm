@@ -1,27 +1,17 @@
-/*******************************************************************************
-* Copyright 2020 Intel Corporation
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*******************************************************************************/
 
-/// convolution.cpp
-///
-/// This C++ API example demonstrates how to create and execute a
-/// Convolution primitive in forward propagation mode.
-///
-/// Key optimizations included in this example:
-/// - Creation of optimized memory format from the primitive descriptor;
-/// - Primitive attributes with fused post-ops.
+/**
+ * convolution.cpp
+ * 
+ * This C++ API example demonstrates how to create and execute a
+ * Convolution primitive in forward propagation mode.
+ * 
+ * Key optimizations included in this example:
+ *  - Creation of optimized memory format from the primitive descriptor;
+ *  - Primitive attributes with fused post-ops.
+ *
+ * More information about oneDNN convolution algorithms:
+ * https://oneapi-src.github.io/oneDNN/dev_guide_convolution.html
+ */
 
 #include <algorithm>
 #include <cmath>
@@ -31,168 +21,181 @@
 
 #include "oneapi/dnnl/dnnl.hpp"
 #include "dnnl_debug.h"
-#include "example_utils.hpp"
+#include "utils.hpp"
 
+using namespace std;
 using namespace dnnl;
 
-using tag = memory::format_tag;
-using dt = memory::data_type;
+using tag = dnnl::memory::format_tag;
+using dt = dnnl::memory::data_type;
 
-void convolution_example(dnnl::engine::kind engine_kind) {
+// Tensor constants.
+const memory::dim 
+  m_size = 1 << 6,       
+  PH_L = 0,                           // height padding: left
+  PH_R = 0,                           // height padding: right
+  PW_L = 0,                           // width padding: left
+  PW_R = 0,                           // width padding: right
+  SH = 1,                             // height-wise stride
+  SW = 1,                             // width-wise stride
+  N = 4,                              // batch size
+  C = 4,                              // input channels
+  K = 4,                              // output channels / number of filters
+  H = m_size / 2,                     // image height
+  W = m_size / 2,                     // image width
+  R = 3,                              // filter height
+  S = 3,                              // filter width
+  P = (H - R + PH_L + PH_R) / SH + 1, // output height
+  Q = (W - S + PW_L + PW_R) / SW + 1; // output width
 
-    // Create execution dnnl::engine.
-    dnnl::engine engine(engine_kind, 0);
+// Tensor dimensions.
+const memory::dims 
+  x_dims = {N, C, H, W},
+  f_dims = {K, C, R, S},
+  bias_dims = {K},
+  y_dims = {N, K, P, Q},
+  strides_dims = {SH, SW},
+  padding_dims_l = {PH_L, PW_L},
+  padding_dims_r = {PH_R, PW_R};
 
-    // Create dnnl::stream.
-    dnnl::stream engine_stream(engine);
+void convolution(dnnl::engine::kind engine_kind) {
 
-    // Tensor dimensions.
-    const memory::dim N = 3, // batch size
-            IC = 32, // input channels
-            IH = 13, // input height
-            IW = 13, // input width
-            OC = 64, // output channels
-            KH = 3, // weights height
-            KW = 3, // weights width
-            PH_L = 1, // height padding: left
-            PH_R = 1, // height padding: right
-            PW_L = 1, // width padding: left
-            PW_R = 1, // width padding: right
-            SH = 4, // height-wise stride
-            SW = 4, // width-wise stride
-            OH = (IH - KH + PH_L + PH_R) / SH + 1, // output height
-            OW = (IW - KW + PW_L + PW_R) / SW + 1; // output width
+  // Create execution engine and stream
+  dnnl::engine engine(engine_kind, 0);
+  dnnl::stream stream(engine);
 
-    // Source (src), weights, bias, and destination (dst) tensors
-    // dimensions.
-    memory::dims src_dims = {N, IC, IH, IW};
-    memory::dims weights_dims = {OC, IC, KH, KW};
-    memory::dims bias_dims = {OC};
-    memory::dims dst_dims = {N, OC, OH, OW};
+  // Allocate buffers.
+  std::vector<float> x_vec(product(x_dims));
+  std::vector<float> f_vec(product(f_dims));
+  std::vector<float> y_vec(product(y_dims));
+  std::vector<float> bias_vec(K);
 
-    // Strides, padding dimensions.
-    memory::dims strides_dims = {SH, SW};
-    memory::dims padding_dims_l = {PH_L, PW_L};
-    memory::dims padding_dims_r = {PH_R, PW_R};
+  // Initialize tensors.
+  std::generate(x_vec.begin(), x_vec.end(), []() {
+    static int i = 0;
+    return std::cos(i++ / 10.f);
+  });
+  std::generate(f_vec.begin(), f_vec.end(), []() {
+    static int i = 0;
+    return std::sin(i++ * 2.f);
+  });
+  std::generate(bias_vec.begin(), bias_vec.end(), []() {
+    static int i = 0;
+    return std::tanh(i++);
+  });
 
-    // Allocate buffers.
-    std::vector<float> src_data(product(src_dims));
-    std::vector<float> weights_data(product(weights_dims));
-    std::vector<float> bias_data(OC);
-    std::vector<float> dst_data(product(dst_dims));
+  // Create memory descriptors with format_tag::any for the primitive. This
+  // enables the convolution primitive to choose memory layouts for an
+  // optimized primitive implementation, and these layouts may differ from the
+  // ones provided by the user.
+  auto x_md = memory::desc(x_dims, dt::f32, tag::any);
+  auto f_md = memory::desc(f_dims, dt::f32, tag::any);
+  auto y_md = memory::desc(y_dims, dt::f32, tag::any);
+  auto bias_md = memory::desc(bias_dims, dt::f32, tag::a);
 
-    // Initialize src, weights, and dst tensors.
-    std::generate(src_data.begin(), src_data.end(), []() {
-        static int i = 0;
-        return std::cos(i++ / 10.f);
-    });
-    std::generate(weights_data.begin(), weights_data.end(), []() {
-        static int i = 0;
-        return std::sin(i++ * 2.f);
-    });
-    std::generate(bias_data.begin(), bias_data.end(), []() {
-        static int i = 0;
-        return std::tanh(i++);
-    });
+  // Create memory objects = memory descriptors + data. In this example, 
+  // NCHW layout is assumed for src and dst, and OIHW for weights.
+  auto x_mem = memory({x_dims, dt::f32, tag::nchw}, engine);
+  auto f_mem = memory({f_dims, dt::f32, tag::oihw}, engine);
+  auto y_mem = memory({y_dims, dt::f32, tag::nchw}, engine);
+  auto bias_mem = memory(bias_md, engine);
 
-    // Create memory objects for tensor data (src, weights, dst). In this
-    // example, NCHW layout is assumed for src and dst, and OIHW for weights.
-    auto user_src_mem = memory({src_dims, dt::f32, tag::nchw}, engine);
-    auto user_weights_mem = memory({weights_dims, dt::f32, tag::oihw}, engine);
-    auto user_dst_mem = memory({dst_dims, dt::f32, tag::nchw}, engine);
+  // Fill the memory object's handle with the data.
+  write_to_dnnl_memory(x_vec.data(), x_mem);
+  write_to_dnnl_memory(f_vec.data(), f_mem);
+  write_to_dnnl_memory(bias_vec.data(), bias_mem);
 
-    // Create memory descriptors with format_tag::any for the primitive. This
-    // enables the convolution primitive to choose memory layouts for an
-    // optimized primitive implementation, and these layouts may differ from the
-    // ones provided by the user.
-    auto conv_src_md = memory::desc(src_dims, dt::f32, tag::any);
-    auto conv_weights_md = memory::desc(weights_dims, dt::f32, tag::any);
-    auto conv_dst_md = memory::desc(dst_dims, dt::f32, tag::any);
+  // Create operation descriptor.
+  auto conv_desc = convolution_forward::desc(
+    prop_kind::forward_training,
+    algorithm::convolution_direct, // <---------------------------------------    convolution_winograd | convolution_direct | gemm (fallback)
+    x_md, f_md, bias_md, y_md, 
+    strides_dims, padding_dims_l, padding_dims_r
+  );
 
-    // Create memory descriptor and memory object for input bias.
-    auto user_bias_md = memory::desc(bias_dims, dt::f32, tag::a);
-    auto user_bias_mem = memory(user_bias_md, engine);
+  
+  // We could indicate additional operations to apply to the result.
+  // For example ReLU: y[:] = ReLU(y[:] + convolution(x[:],f[:]))
+  primitive_attr conv_attr;
+  //post_ops conv_ops;
+  //const float scale = 1.f, alpha = 0.f, beta = 0.f;
+  //conv_ops.append_eltwise(scale, algorithm::eltwise_relu, alpha, beta);
+  //conv_attr.set_post_ops(conv_ops);
 
-    // Write data to memory object's handle.
-    write_to_dnnl_memory(src_data.data(), user_src_mem);
-    write_to_dnnl_memory(weights_data.data(), user_weights_mem);
-    write_to_dnnl_memory(bias_data.data(), user_bias_mem);
+  // Create primitive descriptor.
+  auto conv_pd
+    = convolution_forward::primitive_desc(conv_desc, conv_attr, engine);
 
-    // Create operation descriptor.
-    auto conv_desc = convolution_forward::desc(prop_kind::forward_training,
-            algorithm::convolution_direct, conv_src_md, conv_weights_md,
-            user_bias_md, conv_dst_md, strides_dims, padding_dims_l,
-            padding_dims_r);
+  // For now, assume that the src, weights, and dst memory layouts generated
+  // by the primitive and the ones provided by the user are identical.
+  auto conv_x_mem = x_mem;
+  auto conv_f_mem = f_mem;
+  auto conv_y_mem = y_mem;
 
-    // Create primitive post-ops (ReLU).
-    const float scale = 1.f;
-    const float alpha = 0.f;
-    const float beta = 0.f;
-    post_ops conv_ops;
-    conv_ops.append_eltwise(scale, algorithm::eltwise_relu, alpha, beta);
-    primitive_attr conv_attr;
-    conv_attr.set_post_ops(conv_ops);
+  // Reorder the data in case the src and weights memory layouts generated by
+  // the primitive and the ones provided by the user are different. In this
+  // case, we create additional memory objects with internal buffers that will
+  // contain the reordered data. The data in dst will be reordered after the
+  // convolution computation has finalized.
+  if (conv_pd.src_desc() != x_mem.get_desc()) {
+    conv_x_mem = memory(conv_pd.src_desc(), engine);
+    reorder(x_mem, conv_x_mem)
+      .execute(stream, x_mem, conv_x_mem);
+  }
 
-    // Create primitive descriptor.
-    auto conv_pd
-            = convolution_forward::primitive_desc(conv_desc, conv_attr, engine);
+  if (conv_pd.weights_desc() != f_mem.get_desc()) {
+    conv_f_mem = memory(conv_pd.weights_desc(), engine);
+    reorder(f_mem, conv_f_mem)
+      .execute(stream, f_mem, conv_f_mem);
+  }
 
-    // For now, assume that the src, weights, and dst memory layouts generated
-    // by the primitive and the ones provided by the user are identical.
-    auto conv_src_mem = user_src_mem;
-    auto conv_weights_mem = user_weights_mem;
-    auto conv_dst_mem = user_dst_mem;
+  if (conv_pd.dst_desc() != y_mem.get_desc()) {
+    conv_y_mem = memory(conv_pd.dst_desc(), engine);
+  }
 
-    // Reorder the data in case the src and weights memory layouts generated by
-    // the primitive and the ones provided by the user are different. In this
-    // case, we create additional memory objects with internal buffers that will
-    // contain the reordered data. The data in dst will be reordered after the
-    // convolution computation has finalized.
-    if (conv_pd.src_desc() != user_src_mem.get_desc()) {
-        conv_src_mem = memory(conv_pd.src_desc(), engine);
-        reorder(user_src_mem, conv_src_mem)
-                .execute(engine_stream, user_src_mem, conv_src_mem);
-    }
+  // Create the primitive.
+  auto conv_prim = convolution_forward(conv_pd);
 
-    if (conv_pd.weights_desc() != user_weights_mem.get_desc()) {
-        conv_weights_mem = memory(conv_pd.weights_desc(), engine);
-        reorder(user_weights_mem, conv_weights_mem)
-                .execute(engine_stream, user_weights_mem, conv_weights_mem);
-    }
+  // Primitive arguments.
+  std::unordered_map<int, memory> conv_args;
+  conv_args.insert({DNNL_ARG_SRC, conv_x_mem});
+  conv_args.insert({DNNL_ARG_WEIGHTS, conv_f_mem});
+  conv_args.insert({DNNL_ARG_BIAS, bias_mem});
+  conv_args.insert({DNNL_ARG_DST, conv_y_mem});
 
-    if (conv_pd.dst_desc() != user_dst_mem.get_desc()) {
-        conv_dst_mem = memory(conv_pd.dst_desc(), engine);
-    }
+  // Primitive execution: forward convolution direct algorithm.
+  conv_prim.execute(stream, conv_args); // <----------------------------------    time measurement ?
 
-    // Create the primitive.
-    auto conv_prim = convolution_forward(conv_pd);
+  // Reorder the data in case the dst memory descriptor generated by the
+  // primitive and the one provided by the user are different.
+  if (conv_pd.dst_desc() != y_mem.get_desc()) {
+    reorder(conv_y_mem, y_mem)
+      .execute(stream, conv_y_mem, y_mem);
+  } else {
+    y_mem = conv_y_mem;
+  }
 
-    // Primitive arguments.
-    std::unordered_map<int, memory> conv_args;
-    conv_args.insert({DNNL_ARG_SRC, conv_src_mem});
-    conv_args.insert({DNNL_ARG_WEIGHTS, conv_weights_mem});
-    conv_args.insert({DNNL_ARG_BIAS, user_bias_mem});
-    conv_args.insert({DNNL_ARG_DST, conv_dst_mem});
+  // Wait for the computation to finalize.
+  stream.wait();
 
-    // Primitive execution: convolution with ReLU.
-    conv_prim.execute(engine_stream, conv_args);
-
-    // Reorder the data in case the dst memory descriptor generated by the
-    // primitive and the one provided by the user are different.
-    if (conv_pd.dst_desc() != user_dst_mem.get_desc()) {
-        reorder(conv_dst_mem, user_dst_mem)
-                .execute(engine_stream, conv_dst_mem, user_dst_mem);
-    } else
-        user_dst_mem = conv_dst_mem;
-
-    // Wait for the computation to finalize.
-    engine_stream.wait();
-
-    // Read data from memory object's handle.
-    read_from_dnnl_memory(dst_data.data(), user_dst_mem);
+  // Read data from memory object's handle.
+  read_from_dnnl_memory(y_vec.data(), y_mem);
 }
 
 int main(int argc, char **argv) {
-    return handle_example_errors(
-            convolution_example, parse_engine_kind(argc, argv));
+  return handle_errors(parse_engine_kind(argc, argv), convolution);
 }
+
+//    Copyright 2021 Sara Aguado Couselo
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
