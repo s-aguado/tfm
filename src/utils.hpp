@@ -1,6 +1,6 @@
 
 /**
- * utils.cpp
+ * utils.hpp
  * 
  * Common functions to use with the convolution codes.
  */
@@ -47,35 +47,50 @@
   #define PRAGMA_OMP_PARALLEL_FOR_COLLAPSE(n)
 #endif
 
-// Exception class to indicate that the example uses a feature that is not
-// available on the current systems. It is not treated as an error then, but
-// just notifies a user.
-struct unimplemented : public std::exception {
-  unimplemented(const char *msg) noexcept : message(msg) {}
-  const char *what() const noexcept override { return message; }
-  const char *message;
-};
+// Tensor constants.
+int
+  N = 4,                              // batch size
+  C = 4,                              // input channels
+  K = 4,                              // output channels / number of filters
+  H = 16,                             // image height
+  W = 16,                             // image width
+  R = 3,                              // filter height
+  S = 3,                              // filter width
+  PH_L = 0,                           // height padding: left
+  PH_R = 0,                           // height padding: right
+  PW_L = 0,                           // width padding: left
+  PW_R = 0,                           // width padding: right
+  SH = 1,                             // height-wise stride
+  SW = 1,                             // width-wise stride
+  P = (H - R + PH_L + PH_R) / SH + 1, // output height
+  Q = (W - S + PW_L + PW_R) / SW + 1; // output width
 
-// Returns the string representation of the engine kind
-inline const char *engine_kind2str_upper(dnnl::engine::kind kind) {
-  if (kind == dnnl::engine::kind::cpu) return "CPU";
-  if (kind == dnnl::engine::kind::gpu) return "GPU";
+// Tensor dimensions.
+dnnl::memory::dims 
+  x_dims = {N, C, H, W},
+  f_dims = {K, C, R, S},
+  y_dims = {N, K, P, Q},
+  bias_dims = {K},
+  strides_dims = {SH, SW},
+  padding_dims_l = {PH_L, PW_L},
+  padding_dims_r = {PH_R, PW_R};
+
+// Returns the string representation of the engine kind.
+inline const std::string engine_to_string(dnnl::engine::kind engine_kind) {
+  if (engine_kind == dnnl::engine::kind::cpu) return "CPU";
+  if (engine_kind == dnnl::engine::kind::gpu) return "GPU";
   assert(!"not expected");
   return "<Unknown engine>";
 }
 
 // Runs example function with signature void() and catches errors.
 // Returns `0` on success, `1` or oneDNN error, and `2` on program error.
-inline int handle_errors(
-  dnnl::engine::kind engine_kind,
-  std::function<void()> example) {
+inline int handle_errors(dnnl::engine::kind engine_kind, 
+                         std::function<void()> example) {
   int exit_code = 0;
 
   try {
     example();
-  } catch (unimplemented &e) {
-    std::cout << e.message << std::endl;
-    exit_code = 0;
   } catch (dnnl::error &e) {
     std::cout << "oneDNN error caught: " << std::endl
       << "\tStatus: " << dnnl_status2str(e.status) << std::endl
@@ -86,9 +101,11 @@ inline int handle_errors(
     exit_code = 2;
   }
 
-  std::string engine_kind_str = engine_kind2str_upper(engine_kind);
-  std::cout << "Example " << (exit_code ? "failed" : "passed") << " on "
-    << engine_kind_str << "." << std::endl;
+  std::cout << "Convolution y(" << N << "·" << K << "·" << P << "·" << Q
+                    << ") = x(" << N << "·" << C << "·" << H << "·" << W
+                    << ") * f(" << K << "·" << C << "·" << R << "·" << S
+                    << ") on " << engine_to_string(engine_kind) << ": "
+                    << (exit_code ? "failed" : "passed") << std::endl;
   return exit_code;
 }
 
@@ -109,46 +126,78 @@ inline int handle_errors(
     engine_kind, [&]() { example(engine_kind); });
 }
 
-// Validates that at least one device of that kind exists on the machine
-dnnl::engine::kind validate_engine_kind(dnnl::engine::kind akind) {
-  if (dnnl::engine::get_count(akind) == 0) {
+// Validates that at least one device of that kind exists on the machine.
+inline dnnl::engine::kind validate_engine_kind(dnnl::engine::kind engine_kind) {
+  if (dnnl::engine::get_count(engine_kind) == 0) {
     std::cout << "Application couldn't find any device for the selected engine."
-    << " Try with other engine kind instead.\n";
+              << " Try with other engine kind instead.\n";
     exit(0);
   }
-  return akind;
+  return engine_kind;
 }
 
-// Selects the device on which the operation will be performed, CPU by default.
-inline dnnl::engine::kind parse_engine_kind(int argc, char **argv) {
+// Parses the program arguments and returns the engine kind.
+inline dnnl::engine::kind parse_arguments(int argc, char **argv) {
 
-  if (argc <= 1)
+  if (argc == 1)
     return validate_engine_kind(dnnl::engine::kind::cpu);
-  
-  std::string engine_kind = argv[1];
-  
-  if (engine_kind == "cpu")
-    return validate_engine_kind(dnnl::engine::kind::cpu);
-  if (engine_kind == "gpu")
-    return validate_engine_kind(dnnl::engine::kind::gpu);
 
-  std::cout << "Inappropriate engine kind.\n"
-    << "Please indicate the engine kind in the first argument: " 
-    << argv[0] << " [cpu|gpu] [arguments..]\n";
-  
+  if (argc == 9) {
+    N = atoi(argv[2]);
+    C = atoi(argv[3]);
+    K = atoi(argv[4]);
+    H = atoi(argv[5]);
+    W = atoi(argv[6]);
+    R = atoi(argv[7]);
+    S = atoi(argv[8]);
+    P = (H - R + PH_L + PH_R) / SH + 1; // output height
+    Q = (W - S + PW_L + PW_R) / SW + 1; // output width
+
+    x_dims = {N, C, H, W};
+    f_dims = {K, C, R, S};
+    y_dims = {N, K, P, Q};
+    bias_dims = {K};
+    strides_dims = {SH, SW};
+    padding_dims_l = {PH_L, PW_L};
+    padding_dims_r = {PH_R, PW_R};
+  }
+
+  if (argc == 2 || argc == 9) {
+    std::string engine_kind = argv[1];
+
+    if (engine_kind == "cpu")
+      return validate_engine_kind(dnnl::engine::kind::cpu);
+    if (engine_kind == "gpu")
+      return validate_engine_kind(dnnl::engine::kind::gpu);
+  }
+
+  std::cout << "Usage: " << argv[0] << " [cpu|gpu] [N C K H W R S]\n";
   exit(1);
 }
 
+// Returns a device selector depending on the device type.
+const sycl::device_selector &select_device(dnnl::engine::kind engine_kind) {
+  
+  static const sycl::gpu_selector gpu;
+  static const sycl::cpu_selector cpu;
+  
+  if (engine_kind == dnnl::engine::kind::gpu) {
+    return gpu;
+  }
+  return cpu;
+}
+
+// Multiplies thedimensions to get the total size of the memory object.
 inline dnnl::memory::dim product(const dnnl::memory::dims &dims) {
   return std::accumulate(dims.begin(), dims.end(), (dnnl::memory::dim)1,
     std::multiplies<dnnl::memory::dim>());
 }
 
-// Read from memory, write to handle
+// Read from memory, write to handle.
 inline void read_from_dnnl_memory(void *handle, dnnl::memory &mem) {
+
   dnnl::engine eng = mem.get_engine();
   size_t size = mem.get_desc().get_size();
-
   if (!handle) throw std::runtime_error("handle is nullptr.");
 
   #ifdef DNNL_WITH_SYCL
@@ -208,11 +257,11 @@ inline void read_from_dnnl_memory(void *handle, dnnl::memory &mem) {
   assert(!"not expected");
 }
 
-// Read from handle, write to memory
+// Read from handle, write to memory.
 inline void write_to_dnnl_memory(void *handle, dnnl::memory &mem) {
+
   dnnl::engine eng = mem.get_engine();
   size_t size = mem.get_desc().get_size();
-
   if (!handle) throw std::runtime_error("handle is nullptr.");
 
   #ifdef DNNL_WITH_SYCL
@@ -270,6 +319,17 @@ inline void write_to_dnnl_memory(void *handle, dnnl::memory &mem) {
   }
 
   assert(!"not expected");
+}
+
+// Initializes three vectors with synthetic values. Note: avoids the use 
+// of floating point values due to precision errors between devices.
+inline void init_data(std::vector<float> &a, 
+                      std::vector<float> &b, 
+                      std::vector<float> &c) {
+  
+  for (int i = 0; i < a.size(); i++) a[i] = i % H;
+  for (int i = 0; i < b.size(); i++) b[i] = i % S;
+  for (int i = 0; i < c.size(); i++) c[i] = 0;
 }
 
 #endif

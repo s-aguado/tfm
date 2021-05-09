@@ -21,7 +21,7 @@
 
 #include "oneapi/dnnl/dnnl.hpp"
 #include "dnnl_debug.h"
-#include "utils.hpp"
+#include "../utils.hpp"
 
 using namespace std;
 using namespace dnnl;
@@ -29,60 +29,11 @@ using namespace dnnl;
 using tag = dnnl::memory::format_tag;
 using dt = dnnl::memory::data_type;
 
-// Tensor constants.
-const memory::dim 
-  m_size = 1 << 6,       
-  PH_L = 0,                           // height padding: left
-  PH_R = 0,                           // height padding: right
-  PW_L = 0,                           // width padding: left
-  PW_R = 0,                           // width padding: right
-  SH = 1,                             // height-wise stride
-  SW = 1,                             // width-wise stride
-  N = 4,                              // batch size
-  C = 4,                              // input channels
-  K = 4,                              // output channels / number of filters
-  H = m_size / 2,                     // image height
-  W = m_size / 2,                     // image width
-  R = 3,                              // filter height
-  S = 3,                              // filter width
-  P = (H - R + PH_L + PH_R) / SH + 1, // output height
-  Q = (W - S + PW_L + PW_R) / SW + 1; // output width
-
-// Tensor dimensions.
-const memory::dims 
-  x_dims = {N, C, H, W},
-  f_dims = {K, C, R, S},
-  bias_dims = {K},
-  y_dims = {N, K, P, Q},
-  strides_dims = {SH, SW},
-  padding_dims_l = {PH_L, PW_L},
-  padding_dims_r = {PH_R, PW_R};
-
 void convolution(dnnl::engine::kind engine_kind) {
 
   // Create execution engine and stream
   dnnl::engine engine(engine_kind, 0);
   dnnl::stream stream(engine);
-
-  // Allocate buffers.
-  std::vector<float> x_vec(product(x_dims));
-  std::vector<float> f_vec(product(f_dims));
-  std::vector<float> y_vec(product(y_dims));
-  std::vector<float> bias_vec(K);
-
-  // Initialize tensors.
-  std::generate(x_vec.begin(), x_vec.end(), []() {
-    static int i = 0;
-    return std::cos(i++ / 10.f);
-  });
-  std::generate(f_vec.begin(), f_vec.end(), []() {
-    static int i = 0;
-    return std::sin(i++ * 2.f);
-  });
-  std::generate(bias_vec.begin(), bias_vec.end(), []() {
-    static int i = 0;
-    return std::tanh(i++);
-  });
 
   // Create memory descriptors with format_tag::any for the primitive. This
   // enables the convolution primitive to choose memory layouts for an
@@ -100,6 +51,15 @@ void convolution(dnnl::engine::kind engine_kind) {
   auto y_mem = memory({y_dims, dt::f32, tag::nchw}, engine);
   auto bias_mem = memory(bias_md, engine);
 
+  // Allocate buffers.
+  std::vector<float> x_vec(product(x_dims));
+  std::vector<float> f_vec(product(f_dims));
+  std::vector<float> y_vec(product(y_dims), 0);
+  std::vector<float> bias_vec(product(bias_dims));
+
+  // Initialize tensors.
+  init_data(x_vec, f_vec, bias_vec);
+
   // Fill the memory object's handle with the data.
   write_to_dnnl_memory(x_vec.data(), x_mem);
   write_to_dnnl_memory(f_vec.data(), f_mem);
@@ -112,7 +72,6 @@ void convolution(dnnl::engine::kind engine_kind) {
     x_md, f_md, bias_md, y_md, 
     strides_dims, padding_dims_l, padding_dims_r
   );
-
   
   // We could indicate additional operations to apply to the result.
   // For example ReLU: y[:] = ReLU(y[:] + convolution(x[:],f[:]))
@@ -183,7 +142,7 @@ void convolution(dnnl::engine::kind engine_kind) {
 }
 
 int main(int argc, char **argv) {
-  return handle_errors(parse_engine_kind(argc, argv), convolution);
+  return handle_errors(parse_arguments(argc,argv), convolution);
 }
 
 //    Copyright 2021 Sara Aguado Couselo
