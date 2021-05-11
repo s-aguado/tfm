@@ -11,8 +11,8 @@ LDLIBS=-ldnnl
 
 all: ${TARGET}
 
-debug:
-	$(CXX) -DDEBUG -g -O0 -fsycl $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) ${TARGET}.cpp $(LDLIBS) -o ${TARGET}
+debug: CXXFLAGS += -g -O0 -fsycl -DDEBUG
+debug: all;
 
 clean:
 	rm ${TARGET}

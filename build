@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mkdir bin
+cd src/oneapi/ && make $1 && mv convolution ../../bin/ && cd ../../
+cd src/onednn/ && make $1 && mv direct winograd gemm ../../bin/ && cd ../../

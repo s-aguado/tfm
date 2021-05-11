@@ -101,11 +101,14 @@ inline int handle_errors(dnnl::engine::kind engine_kind,
     exit_code = 2;
   }
 
-  std::cout << "Convolution y(" << N << "·" << K << "·" << P << "·" << Q
+  #ifdef DEBUG
+    std::cout << "Convolution y(" << N << "·" << K << "·" << P << "·" << Q
                     << ") = x(" << N << "·" << C << "·" << H << "·" << W
                     << ") * f(" << K << "·" << C << "·" << R << "·" << S
                     << ") on " << engine_to_string(engine_kind) << ": "
                     << (exit_code ? "failed" : "passed") << std::endl;
+  #endif
+
   return exit_code;
 }
 
@@ -157,9 +160,6 @@ inline dnnl::engine::kind parse_arguments(int argc, char **argv) {
     f_dims = {K, C, R, S};
     y_dims = {N, K, P, Q};
     bias_dims = {K};
-    strides_dims = {SH, SW};
-    padding_dims_l = {PH_L, PW_L};
-    padding_dims_r = {PH_R, PW_R};
   }
 
   if (argc == 2 || argc == 9) {

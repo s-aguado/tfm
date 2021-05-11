@@ -44,6 +44,13 @@ void convolution(dnnl::engine::kind engine_kind) {
   auto y_md = memory::desc(y_dims, dt::f32, tag::any);
   auto bias_md = memory::desc(bias_dims, dt::f32, tag::a);
 
+  // Forces the fallback to the gemm algorithm indicating the format_tag.
+  #ifdef GEMM
+    x_md = memory::desc(x_dims, dt::f32, tag::nchw);
+    f_md = memory::desc(f_dims, dt::f32, tag::oihw);
+    y_md = memory::desc(y_dims, dt::f32, tag::nchw);
+  #endif
+
   // Create memory objects = memory descriptors + data. In this example, 
   // NCHW layout is assumed for src and dst, and OIHW for weights.
   auto x_mem = memory({x_dims, dt::f32, tag::nchw}, engine);
@@ -66,9 +73,15 @@ void convolution(dnnl::engine::kind engine_kind) {
   write_to_dnnl_memory(bias_vec.data(), bias_mem);
 
   // Create operation descriptor.
+  #ifdef WINOGRAD
+    auto convolution_algorithm = algorithm::convolution_winograd;
+  #else
+    auto convolution_algorithm = algorithm::convolution_direct;
+  #endif
+
   auto conv_desc = convolution_forward::desc(
-    prop_kind::forward_training,
-    algorithm::convolution_direct, // <---------------------------------------    convolution_winograd | convolution_direct | gemm (fallback)
+    prop_kind::forward_inference,
+    convolution_algorithm, // convolution_winograd | convolution_direct | gemm (fallback)
     x_md, f_md, bias_md, y_md, 
     strides_dims, padding_dims_l, padding_dims_r
   );
