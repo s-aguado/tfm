@@ -1,5 +1,8 @@
 #!/bin/bash
 
-mkdir bin
+source /opt/intel/inteloneapi/setvars.sh &> /dev/null
+mkdir bin &> /dev/null
+
+cd src/sequential/ && make $1 && mv sequential ../../bin/ && cd ../../
 cd src/oneapi/ && make $1 && mv convolution ../../bin/ && cd ../../
 cd src/onednn/ && make $1 && mv direct winograd gemm ../../bin/ && cd ../../

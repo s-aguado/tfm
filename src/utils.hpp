@@ -332,6 +332,46 @@ inline void init_data(std::vector<float> &a,
   for (int i = 0; i < c.size(); i++) c[i] = 0;
 }
 
+// Perform convolution on host.
+std::vector<float> cpu_convolution() {
+  int n, c, k, h, w, r, s, p, q;
+  int hw=H*W, rs=R*S, pq=P*Q, chw=C*H*W, crs=C*R*S, kpq=K*P*Q;
+  
+  std::vector<float> x_host(N*C*H*W);
+  std::vector<float> f_host(K*C*R*S);
+  std::vector<float> y_host(N*K*P*Q);
+
+  init_data(x_host, f_host, y_host);
+
+  for (n = 0; n < N; n++) {
+    for (k = 0; k < K; k++) {
+      auto y_ = &y_host[n * kpq + k * pq];
+      
+      for (c = 0; c < C; c++) {
+
+        auto x_ = &x_host[n * chw + c * hw];
+        auto f_ = &f_host[k * crs + c * rs];
+
+        for (p = 0; p < P; p++) {
+          for (q = 0; q < Q; q++) {
+            for (r = 0; r < R; r++) {
+              for (s = 0; s < S; s++) {
+
+                h = p + r;
+                w = q + s;
+
+                y_[p*Q+q] += x_[h*W+w] * f_[r*S+s];
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return y_host;
+}
+
 #endif
 
 //    Copyright 2021 Sara Aguado Couselo

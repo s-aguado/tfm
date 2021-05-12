@@ -37,7 +37,7 @@ bool equals(float a, float b) {
  * Compare host side results with the result buffer from device side: print
  * mismatched data 4 times only. 
  */
-bool compare(std::vector<float> &expected, std::vector<float> &result) {
+void compare(std::vector<float> expected, std::vector<float> result) {
   
   int printed_errors = 0;
 
@@ -46,52 +46,11 @@ bool compare(std::vector<float> &expected, std::vector<float> &result) {
       std::cout << "\nFail - The result is incorrect for element: y(" 
            << i/(K*P*Q) << "·" << i/(P*Q) << "·" << i/(Q) << "·" << i%Q 
            << "), expected: " << expected[i] << ", but found: " << result[i];
-      if (++printed_errors == 4) return true;
+      if (++printed_errors == 4) break;
     }
   }
 
-  return false;
-}
-
-/**
- * Perform convolution on host to verify results from device.
- */
-void verify_result(std::vector<float> &y_back, constants_t args) {
-  int n, c, k, h, w, r, s, p, q;
-
-  std::vector<float> x_host(N*C*H*W);
-  std::vector<float> f_host(K*C*R*S);
-  std::vector<float> y_host(N*K*P*Q);
-
-  init_data(x_host, f_host, y_host);
-
-  for (n = 0; n < N; n++) {
-    for (k = 0; k < K; k++) {
-      auto y_ = &y_host[n * args.kpq + k * args.pq];
-      
-      for (c = 0; c < C; c++) {
-
-        auto x_ = &x_host[n * args.chw + c * args.hw];
-        auto f_ = &f_host[k * args.crs + c * args.rs];
-
-        for (p = 0; p < P; p++) {
-          for (q = 0; q < Q; q++) {
-            for (r = 0; r < R; r++) {
-              for (s = 0; s < S; s++) {
-
-                h = p + r;
-                w = q + s;
-
-                y_[p*Q+q] += x_[h*W+w] * f_[r*S+s];
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (compare(y_host, y_back)) {
+  if (printed_errors) {
     std::cout << "\nFail - The results mismatch!\n";
   } else {
     std::cout << ": Success - The results are correct!\n";
@@ -176,8 +135,8 @@ void convolution(dnnl::engine::kind engine_kind) {
     std::terminate();
   } // y_back is updated when y_buf is destroyed upon exiting scope
 
-  #ifdef DEBUG
-  verify_result(y_back, constants); // only run the sequential convolution if debugging
+  #ifdef DEBUG // only run the sequential convolution if debugging
+  compare(y_back, cpu_convolution()); 
   #endif
 }
 
