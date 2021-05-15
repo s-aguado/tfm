@@ -12,16 +12,16 @@ Code repository for the Master Thesis *Implementación do algoritmo da convoluci
 
 #### Local
 
-Set the environment:
-
-```bash
-source /opt/intel/inteloneapi/setvars.sh # replace with custom installation path 
-```
-
 Clone this repository:
 
 ```bash
 git clone https://git.fic.udc.es/s.aguado/tfm.git && cd tfm
+```
+
+Set the environment:
+
+```bash
+source /opt/intel/inteloneapi/setvars.sh # replace with custom installation path 
 ```
 
 Compile the codes:

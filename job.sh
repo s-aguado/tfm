@@ -4,8 +4,11 @@
 #PBS -l nodes=1:gpu:ppn=2
 #PBS -d .
 
+# Set the environment
+source /opt/intel/inteloneapi/setvars.sh &> /dev/null
+
 # Build the project
-./build &> /dev/null && cd bin/
+./build > /dev/null && cd bin/
 
 # Run the tests
 TIMEFORMAT='%4R';
@@ -14,7 +17,20 @@ echo "executable,device,parameters,time1,time2,time3,time4";
 executable="sequential"; 
 device="cpu";
 
-for params in "4 2 2 1024 1024 3 3" "4 4 4 1024 1024 3 3"; do
+for params in\
+  "4  2 2 1024 1024 3 3"\
+  "8  2 2 1024 1024 3 3"\
+  "16 2 2 1024 1024 3 3"\
+  "4  4 4 1024 1024 3 3"\
+  "8  4 4 1024 1024 3 3"\
+  "16 4 4 1024 1024 3 3"\
+  "4  2 2 2048 2048 3 3"\
+  "8  2 2 2048 2048 3 3"\
+  "16 2 2 2048 2048 3 3"\
+  "4  4 4 2048 2048 3 3"\
+  "8  4 4 2048 2048 3 3"\
+  "16 4 4 2048 2048 3 3"
+do
   printf "${executable},${device},${params}"
   for i in {1..4}; do
     timei=$( { time ./${executable} ${device} ${params}; } 2>&1 )
@@ -25,7 +41,20 @@ done;
 executable="winograd"; 
 device="gpu";
 
-for params in "4 2 2 1024 1024 3 3" "4 4 4 1024 1024 3 3"; do
+for params in\
+  "4  2 2 1024 1024 3 3"\
+  "8  2 2 1024 1024 3 3"\
+  "16 2 2 1024 1024 3 3"\
+  "4  4 4 1024 1024 3 3"\
+  "8  4 4 1024 1024 3 3"\
+  "16 4 4 1024 1024 3 3"\
+  "4  2 2 2048 2048 3 3"\
+  "8  2 2 2048 2048 3 3"\
+  "16 2 2 2048 2048 3 3"\
+  "4  4 4 2048 2048 3 3"\
+  "8  4 4 2048 2048 3 3"\
+  "16 4 4 2048 2048 3 3"
+do
   printf "${executable},${device},${params}"
   for i in {1..4}; do
     timei=$( { time ./${executable} ${device} ${params}; } 2>&1 )
@@ -36,7 +65,20 @@ done;
 executable="direct"; 
 
 for device in "cpu" "gpu"; do
-  for params in "4 2 2 1024 1024 3 3" "4 4 4 1024 1024 3 3"; do
+  for params in\
+    "4  2 2 1024 1024 3 3"\
+    "8  2 2 1024 1024 3 3"\
+    "16 2 2 1024 1024 3 3"\
+    "4  4 4 1024 1024 3 3"\
+    "8  4 4 1024 1024 3 3"\
+    "16 4 4 1024 1024 3 3"\
+    "4  2 2 2048 2048 3 3"\
+    "8  2 2 2048 2048 3 3"\
+    "16 2 2 2048 2048 3 3"\
+    "4  4 4 2048 2048 3 3"\
+    "8  4 4 2048 2048 3 3"\
+    "16 4 4 2048 2048 3 3"
+  do
     printf "${executable},${device},${params}"
     for i in {1..4}; do
       timei=$( { time ./${executable} ${device} ${params}; } 2>&1 )
@@ -47,7 +89,20 @@ done;
 
 for executable in "gemm" "convolution"; do
   for device in "cpu" "gpu"; do
-    for params in "4 2 2 1024 1024 3 3" "4 4 4 1024 1024 3 3"; do
+    for params in\
+      "4  2 2 1024 1024 3 3"\
+      "8  2 2 1024 1024 3 3"\
+      "16 2 2 1024 1024 3 3"\
+      "4  4 4 1024 1024 3 3"\
+      "8  4 4 1024 1024 3 3"\
+      "16 4 4 1024 1024 3 3"\
+      "4  2 2 2048 2048 3 3"\
+      "8  2 2 2048 2048 3 3"\
+      "16 2 2 2048 2048 3 3"\
+      "4  4 4 2048 2048 3 3"\
+      "8  4 4 2048 2048 3 3"\
+      "16 4 4 2048 2048 3 3"
+    do
       printf "${executable},${device},${params}"
       for i in {1..4}; do
         timei=$( { time ./${executable} ${device} ${params}; } 2>&1 )
