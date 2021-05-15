@@ -44,7 +44,7 @@ void compare(std::vector<float> expected, std::vector<float> result) {
   for (int i = 0; i < expected.size(); i++) {
     if (!equals(expected[i], result[i])) {
       std::cout << "\nFail - The result is incorrect for element: y(" 
-           << i/(K*P*Q) << "·" << i/(P*Q) << "·" << i/(Q) << "·" << i%Q 
+           << i/(K*P*Q) << "·" << i/(P*Q) << "·" << i/Q << "·" << i%Q 
            << "), expected: " << expected[i] << ", but found: " << result[i];
       if (++printed_errors == 4) break;
     }
@@ -97,32 +97,30 @@ void convolution(dnnl::engine::kind engine_kind) {
       sycl::accessor x(x_buf, context, sycl::read_only);
       sycl::accessor f(f_buf, context, sycl::read_only);
       sycl::accessor y(y_buf, context, sycl::write_only);
-      sycl::accessor args = args_buf.get_access(context);
+      sycl::accessor args(args_buf, context, sycl::read_only);
 
       // Execute kernel
-      context.parallel_for(sycl::range(N,K), [=](auto index) {
-
-        auto a = args[0];
+      context.parallel_for(sycl::range(N,K,P*Q), [=](auto index) {
+        
+        auto arg = args[0];
         int n = index[0];
         int k = index[1];
-        int y_off = n*a.kpq + k*a.pq;
+        int p = index[2] / arg.Q;
+        int q = index[2] % arg.Q;
+        int y_off = n*arg.kpq + k*arg.pq;
 
-        for (int c = 0; c < a.C; c++) {
+        for (int c = 0; c < arg.C; c++) {
 
-          int x_off = n*a.chw + c*a.hw;
-          int f_off = k*a.crs + c*a.rs;
+          int x_off = n*arg.chw + c*arg.hw;
+          int f_off = k*arg.crs + c*arg.rs;
 
-          for (int p = 0; p < a.P; p++) {
-            for (int q = 0; q < a.Q; q++) {
-              for (int r = 0; r < a.R; r++) {
-                for (int s = 0; s < a.S; s++) {
+          for (int r = 0; r < arg.R; r++) {
+            for (int s = 0; s < arg.S; s++) {
 
-                  int h = p + r;
-                  int w = q + s;
+              int h = p + r;
+              int w = q + s;
 
-                  y[y_off + p*a.Q+q] += x[x_off + h*a.W+w] * f[f_off + r*a.S+s];
-                }
-              }
+              y[y_off + p*arg.Q+q] += x[x_off + h*arg.W+w] * f[f_off + r*arg.S+s];
             }
           }
         }

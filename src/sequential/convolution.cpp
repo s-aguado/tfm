@@ -10,12 +10,8 @@
 #include <limits>
 #include "../utils.hpp"
 
-void convolution() {
-  std::vector<float> result = cpu_convolution();
-}
-
 int main(int argc, char **argv) {
-  return handle_errors(parse_arguments(argc,argv), convolution);
+  return handle_errors(parse_arguments(argc,argv), cpu_convolution);
 }
 
 //    Copyright 2021 Sara Aguado Couselo
