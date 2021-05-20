@@ -1,5 +1,1 @@
-src/**/convolution
-src/**/direct
-src/**/gemm
-src/**/winograd
 bin/

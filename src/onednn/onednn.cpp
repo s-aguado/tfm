@@ -1,15 +1,11 @@
 
 /**
- * convolution.cpp
+ * onednn.cpp
  * 
  * This C++ API example demonstrates how to create and execute a
- * Convolution primitive in forward propagation mode.
- * 
- * Key optimizations included in this example:
- *  - Creation of optimized memory format from the primitive descriptor;
- *  - Primitive attributes with fused post-ops.
+ * Convolution primitive in forward propagation mode using all 
+ * the algorithms supported by oneDNN.
  *
- * More information about oneDNN convolution algorithms:
  * https://oneapi-src.github.io/oneDNN/dev_guide_convolution.html
  */
 

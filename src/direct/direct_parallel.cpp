@@ -1,61 +1,26 @@
 
 /**
- * convolution.cpp
+ * direct_parallel.cpp
  * 
  * Implements the direct convolution algorithm in forward propagation mode. 
  * Executes it in both, the CPU and the offload device, then compares 
  * the result. If the code executes on both CPU and the offload device, 
  * the name of the offload device and a success message are displayed.
- *
- * For comprehensive instructions regarding DPC++ Programming, go to
- * https://software.intel.com/en-us/oneapi-programming-guide and search based 
- * on relevant terms noted in the comments.
  */
 
 #include <CL/sycl.hpp>
 #include <iostream>
-#include <limits>
 
-// dpc_common.hpp can be found in the dev-utilities include folder.
-// e.g., $ONEAPIHOME/dev-utilities/latest/include/dpc_common.hpp
 #include "dpc_common.hpp"
 #include "../utils.hpp"
 
+/**
+ * Struct to pass the dimensions to the kernel
+ */
 struct constants_t {
   int N,C,K,H,W,R,S,P,Q; // tensor constants
   int hw,rs,pq,chw,crs,kpq; // precomputed variables
 };
-
-/**
- * Return true if both params have the same value.
- */
-bool equals(float a, float b) {
-  return fabs(a - b) < std::numeric_limits<float>::epsilon();
-}
-
-/**
- * Compare host side results with the result buffer from device side: print
- * mismatched data 4 times only. 
- */
-void compare(std::vector<float> expected, std::vector<float> result) {
-  
-  int printed_errors = 0;
-
-  for (int i = 0; i < expected.size(); i++) {
-    if (!equals(expected[i], result[i])) {
-      std::cout << "\nFail - The result is incorrect for element: y(" 
-           << i/(K*P*Q) << "·" << i/(P*Q) << "·" << i/Q << "·" << i%Q 
-           << "), expected: " << expected[i] << ", but found: " << result[i];
-      if (++printed_errors == 4) break;
-    }
-  }
-
-  if (printed_errors) {
-    std::cout << "\nFail - The results mismatch!\n";
-  } else {
-    std::cout << ": Success - The results are correct!\n";
-  }
-}
 
 /**
  * Perform convolution on device. Uses the dnnl engine_kind only to parse the 
@@ -65,11 +30,11 @@ void convolution(dnnl::engine::kind engine_kind) {
 
   constants_t constants = { N,C,K,H,W,R,S,P,Q,H*W,R*S,P*Q,C*H*W,C*R*S,K*P*Q };
 
-  std::vector<float> x_back(N*C*H*W);
-  std::vector<float> f_back(K*C*R*S);
-  std::vector<float> y_back(N*K*P*Q);
+  std::vector<float> x_vec(N*C*H*W);
+  std::vector<float> f_vec(K*C*R*S);
+  std::vector<float> y_vec(N*K*P*Q);
 
-  init_data(x_back, f_back, y_back);
+  init_data(x_vec, f_vec, y_vec);
 
   try {
     
@@ -83,11 +48,11 @@ void convolution(dnnl::engine::kind engine_kind) {
     std::cout << device_queue.get_device().get_info<sycl::info::device::name>();
     #endif
 
-    // Create 4D buffers for tensors, buffer c is bound with host memory y_back
+    // Create buffers for tensors, buffer c is bound with host memory y_vec
     // Allocate DPC++ buffers for input and output memory objects
-    sycl::buffer x_buf(x_back.data(), sycl::range(N*C*H*W));
-    sycl::buffer f_buf(f_back.data(), sycl::range(K*C*R*S));
-    sycl::buffer y_buf(y_back.data(), sycl::range(N*K*P*Q));
+    sycl::buffer x_buf(x_vec.data(), sycl::range(N*C*H*W));
+    sycl::buffer f_buf(f_vec.data(), sycl::range(K*C*R*S));
+    sycl::buffer y_buf(y_vec.data(), sycl::range(N*K*P*Q));
     sycl::buffer args_buf(&constants, sycl::range(1));
 
     // Submit command group to queue to perform convolution: y = x * f
@@ -127,14 +92,13 @@ void convolution(dnnl::engine::kind engine_kind) {
       });
     });
 
-    device_queue.wait_and_throw();
   } catch (sycl::exception const &e) {
     std::cout << "An exception was caught during the convolution.\n";
     std::terminate();
-  } // y_back is updated when y_buf is destroyed upon exiting scope
+  } // y_vec is updated when y_buf is destroyed upon exiting scope
 
   #ifdef DEBUG // only run the sequential convolution if debugging
-  compare(y_back, cpu_convolution()); 
+  compare(cpu_convolution(), y_vec);
   #endif
 }
 

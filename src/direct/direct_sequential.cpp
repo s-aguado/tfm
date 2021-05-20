@@ -1,13 +1,11 @@
 
 /**
- * convolution.cpp
+ * direct_sequential.cpp
  * 
  * Implements the direct convolution algorithm in forward propagation mode. 
  * Executes it sequentially in the CPU.
  */
 
-#include <iostream>
-#include <limits>
 #include "../utils.hpp"
 
 int main(int argc, char **argv) {

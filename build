@@ -3,6 +3,8 @@
 source /opt/intel/inteloneapi/setvars.sh &> /dev/null
 mkdir bin &> /dev/null
 
-cd src/sequential/ && make $1 && mv sequential ../../bin/ && cd ../../
-cd src/oneapi/ && make $1 && mv convolution ../../bin/ && cd ../../
-cd src/onednn/ && make $1 && mv direct winograd gemm ../../bin/ && cd ../../
+(cd src/onednn/ && make $1 && mv direct_onednn winograd_onednn gemm_onednn ../../bin/ && cd ../../) &
+(cd src/direct/ && make $1 && mv direct_sequential direct_parallel ../../bin/ && cd ../../) &
+(cd src/gemm/ && make $1 && mv gemm_sequential gemm_parallel im2col matmul ../../bin/ && cd ../../) &
+
+wait

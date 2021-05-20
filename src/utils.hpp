@@ -337,20 +337,23 @@ std::vector<float> cpu_convolution() {
   int n, c, k, h, w, r, s, p, q;
   int hw=H*W, rs=R*S, pq=P*Q, chw=C*H*W, crs=C*R*S, kpq=K*P*Q;
   
-  std::vector<float> x_host(N*C*H*W);
-  std::vector<float> f_host(K*C*R*S);
-  std::vector<float> y_host(N*K*P*Q);
+  std::vector<float> x(N*C*H*W);
+  std::vector<float> f(K*C*R*S);
+  std::vector<float> y(N*K*P*Q);
 
-  init_data(x_host, f_host, y_host);
+  init_data(x, f, y);
 
   for (n = 0; n < N; n++) {
+    int n_chw = n * chw;
+    int n_kpq = n * kpq;
+
     for (k = 0; k < K; k++) {
-      auto y_ = &y_host[n * kpq + k * pq];
+      int k_crs = k * crs;
+      int y_off = n_kpq + k * pq;
       
       for (c = 0; c < C; c++) {
-
-        auto x_ = &x_host[n * chw + c * hw];
-        auto f_ = &f_host[k * crs + c * rs];
+        int x_off = n_chw + c * hw;
+        int f_off = k_crs + c * rs;
 
         for (p = 0; p < P; p++) {
           for (q = 0; q < Q; q++) {
@@ -360,7 +363,7 @@ std::vector<float> cpu_convolution() {
                 h = p + r;
                 w = q + s;
 
-                y_[p*Q+q] += x_[h*W+w] * f_[r*S+s];
+                y[y_off + p*Q+q] += x[x_off + h*W+w] * f[f_off + r*S+s];
               }
             }
           }
@@ -369,7 +372,34 @@ std::vector<float> cpu_convolution() {
     }
   }
 
-  return y_host;
+  return y;
+}
+
+// Return true if both params have the same value.
+bool equals(float a, float b) {
+  return fabs(a - b) < std::numeric_limits<float>::epsilon();
+}
+
+// Compare host side results with the result buffer from device side: print
+// mismatched data 4 times only. 
+void compare(std::vector<float> expected, std::vector<float> result) {
+  
+  int printed_errors = 0;
+
+  for (int i = 0; i < expected.size(); i++) {
+    if (!equals(expected[i], result[i])) {
+      std::cout << "\nFail - The result is incorrect for element: y(" 
+           << i/(K*P*Q) << "·" << i/(P*Q) << "·" << i/Q << "·" << i%Q 
+           << "), expected: " << expected[i] << ", but found: " << result[i];
+      if (++printed_errors == 4) break;
+    }
+  }
+
+  if (printed_errors) {
+    std::cout << "\nFail - The results mismatch!\n";
+  } else {
+    std::cout << ": Success - The results are correct!\n";
+  }
 }
 
 #endif

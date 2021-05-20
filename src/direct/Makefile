@@ -2,7 +2,7 @@
 # ~$ source ${ONEAPIHOME}/setvars.sh
 # ~$ make
 
-TARGET=convolution
+TARGET=direct_sequential direct_parallel
 
 CXX=dpcpp
 CXXFLAGS=-std=c++17
@@ -11,7 +11,7 @@ LDLIBS=-ldnnl
 
 all: ${TARGET}
 
-debug: CXXFLAGS += -g -O0 -fsycl -DDEBUG
+debug: CXXFLAGS += -g -O0 -fsycl -Wall -DDEBUG
 debug: all;
 
 clean:
