@@ -2,11 +2,11 @@
 # ~$ source ${ONEAPIHOME}/setvars.sh
 # ~$ make
 
-TARGET=gemm_sequential gemm_parallel gemm_chwn im2col matmul
+TARGET=blis_sequential blis_parallel blis_chwn
 
 CXX=dpcpp
 CXXFLAGS=-std=c++17
-LDFLAGS=-I${DNNLROOT}/include -L${DNNLROOT}/lib 
+LDFLAGS=-I${DNNLROOT}/include -L${DNNLROOT}/lib
 LDLIBS=-ldnnl
 
 all: ${TARGET}

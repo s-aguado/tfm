@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N convolution
-#PBS -l walltime=00:30:00
+#PBS -l walltime=00:45:00
 #PBS -l nodes=1:gpu:ppn=2
 #PBS -d .
 
@@ -16,7 +16,7 @@ echo "executable,device,parameters,time1,time2,time3,time4";
 
 device="cpu";
 
-for executable in "direct_sequential" "gemm_sequential" "im2col" "matmul"; do
+for executable in "direct_sequential" "gemm_sequential" "gemm_chwn" "blis_sequential" "blis_chwn" "im2col" "matmul"; do
   for params in\
     "4  2 2 1024 1024 3 3"\
     "8  2 2 1024 1024 3 3"\
@@ -63,7 +63,7 @@ do
   done; echo
 done;
 
-for executable in "direct_parallel" "direct_onednn" "gemm_parallel" "gemm_onednn"; do
+for executable in "direct_parallel" "direct_onednn" "gemm_parallel" "gemm_onednn" "blis_parallel"; do
   for device in "cpu" "gpu"; do
     for params in\
       "4  2 2 1024 1024 3 3"\
@@ -88,5 +88,5 @@ for executable in "direct_parallel" "direct_onednn" "gemm_parallel" "gemm_onednn
   done;
 done;
 
-# CPU - Intel(R) Xeon(R) E-2176G CPU @ 3.70GHz
+# CPU - Intel(R) Xeon(R) E-2176G CPU @ 3.70GHz - L1 192 | L2 1536 | L3 12288 KiB
 # GPU - Intel(R) UHD Graphics P630 [0x3e96]

@@ -1,25 +1,39 @@
 
 /**
- * gemm_sequential.cpp
+ * gemm_chwn.cpp
  * 
- * Implements the gemm-based convolution algorithm in forward propagation mode. 
- * Executes it sequentially in the CPU, then compares the result with the 
- * direct approach.
+ * Implements the gemm-based convolution algorithm in forward propagation mode.
+ * Uses CHWN data format. Executes it sequentially in the CPU, then compares 
+ * the result with the direct approach.
  */
 
 #include "../utils.hpp"
 
 /**
- * Transforms a 3D input tensor into a 2D matrix.
+ * CHWN to NCHW formatter
  */
+std::vector<float> format_NCHW(float *src, int C, int H, int W, int N) {
+  
+  std::vector<float> result(N*C*H*W);
+  int HWN = H*W*N, WN = W*N, CHW = C*H*W, HW = H*W;
+
+  for (int n = 0; n < N; n++) 
+    for (int c = 0; c < C; c++)
+      for (int h = 0; h < H; h++)
+        for (int w = 0; w < W; w++) 
+          result[n*CHW + c*HW + h*W + w] = src[c*HWN + h*WN + w*N + n];
+
+  return result;
+}
+
 void im2col(float *y, float *x) {
 
-  int c, h, w, r, s, p, q, row, col;
-  int hw=H*W, pq=P*Q, rspq=R*S*P*Q;
+  int n, c, h, w, r, s, p, q, row, col;
+  int chw=C*H*W, hw=H*W, pqn=P*Q*N, rspqn=R*S*P*Q*N;
 
   for (c = 0; c < C; c++) {
     int x_off = c * hw;
-    int y_off = c * rspq;
+    int y_off = c * rspqn;
 
     for (r = 0; r < R; r++) {
       for (s = 0; s < S; s++) {
@@ -29,7 +43,9 @@ void im2col(float *y, float *x) {
             h = p + r; row = r*S + s;
             w = q + s; col = p*Q + q;
 
-            y[y_off + row*pq+col] = x[x_off + h*W+w];
+            for (n = 0; n < N; n++) {
+              y[y_off + row*pqn + col*N + n] = x[n*chw + x_off + h*W + w];
+            }
           }
         }
       }
@@ -37,9 +53,6 @@ void im2col(float *y, float *x) {
   }
 }
 
-/**
- * Performs a simple matrix multiplication.
- */
 void matmul(float *C, float *A, float *B, int M, int N, int K) {
 
   for (int m = 0; m < M; m++) {
@@ -62,17 +75,14 @@ void convolution() {
 
   init_data(x_vec, f_vec, y_vec);
 
-  float *workspace = new float[C*R*S*P*Q];
-  for (int n = 0; n < N; n++) {
-    im2col(workspace, &x_vec[n*C*H*W]);
-    matmul(&y_vec[n*K*P*Q], f_vec.data(), workspace, K, P*Q, C*R*S);
-  }
+  float *w = new float[C*R*S*P*Q*N];
+  im2col(w, x_vec.data());
+  matmul(y_vec.data(), f_vec.data(), w, K, P*Q*N, C*R*S);
+  y_vec = format_NCHW(y_vec.data(), K, P, Q, N);
 
   #ifdef DEBUG // only run the sequential convolution if debugging
-  compare(cpu_convolution(), y_vec); 
+  compare(cpu_convolution(), y_vec);
   #endif
-
-  delete[] workspace;
 }
 
 int main(int argc, char **argv) {

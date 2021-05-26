@@ -49,11 +49,11 @@
 
 // Tensor constants.
 int
-  N = 4,                              // batch size
+  N = 16,                             // batch size
   C = 4,                              // input channels
   K = 4,                              // output channels / number of filters
-  H = 16,                             // image height
-  W = 16,                             // image width
+  H = 512,                            // image height
+  W = 512,                            // image width
   R = 3,                              // filter height
   S = 3,                              // filter width
   PH_L = 0,                           // height padding: left

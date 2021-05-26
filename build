@@ -5,6 +5,7 @@ mkdir bin &> /dev/null
 
 (cd src/onednn/ && make $1 && mv direct_onednn winograd_onednn gemm_onednn ../../bin/ && cd ../../) &
 (cd src/direct/ && make $1 && mv direct_sequential direct_parallel ../../bin/ && cd ../../) &
-(cd src/gemm/ && make $1 && mv gemm_sequential gemm_parallel im2col matmul ../../bin/ && cd ../../) &
+(cd src/gemm/ && make $1 && mv gemm_sequential gemm_parallel gemm_chwn im2col matmul ../../bin/ && cd ../../) &
+(cd src/blis/ && make $1 && mv blis_sequential blis_parallel blis_chwn ../../bin/ && cd ../../) &
 
 wait
