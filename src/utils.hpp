@@ -52,8 +52,8 @@ int
   N = 16,                             // batch size
   C = 4,                              // input channels
   K = 4,                              // output channels / number of filters
-  H = 512,                            // image height
-  W = 512,                            // image width
+  H = 32,                             // image height
+  W = 32,                             // image width
   R = 3,                              // filter height
   S = 3,                              // filter width
   PH_L = 0,                           // height padding: left

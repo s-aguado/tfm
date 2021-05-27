@@ -14,7 +14,7 @@
 #include "dpc_common.hpp"
 
 // cache sizes in number of float elements (4 bytes)
-#define L1_SIZE 49152 
+#define L1_SIZE 24576 //49152
 #define L2_SIZE 393216
 #define L3_SIZE 3145728
 
