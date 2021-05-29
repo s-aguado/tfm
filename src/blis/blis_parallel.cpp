@@ -1,22 +1,22 @@
 
 /**
- * blis_sequential.cpp
+ * blis_parallel.cpp
  * 
  * Implements the gemm-based convolution algorithm in forward propagation mode.
- * Uses the BLIS library to avoid the im2col step. Executes it sequentially in 
- * the CPU, then compares the result with the direct approach.
+ * Reduces the memory consumption avoiding the im2col step.
  */
 
 #include <CL/sycl.hpp>
 #include <iostream>
 
-#include "../utils.hpp"
 #include "dpc_common.hpp"
+#include "../utils.hpp"
 
-// cache sizes in number of float elements (4 bytes)
-#define L1_SIZE 24576 //49152
-#define L2_SIZE 393216
-#define L3_SIZE 3145728
+#ifdef GPU
+  #define SIZE 49152//24576 // Intel(R) UHD Graphics P630 [0x3e96]
+#else 
+  #define SIZE 12288 // Intel(R) Xeon(R) E-2176G CPU @ 3.70GHz
+#endif
 
 /**
  * Struct to pass the dimensions to the kernel
@@ -45,10 +45,11 @@ void matmul(sycl::accessor<float, 1, cl::sycl::access::mode::write> C,
  * Packs a column of matrix B into the buffer B_pack 
  * doing the im2col and the format transformation.
  */
-void pack_B(float *B_pack, const float *B, int pc, int jc, int kc, constants_t arg) {
+void pack_B(float *B_pack, sycl::accessor<float, 1, cl::sycl::access::mode::read> B,
+  int pc, int jc, int kc, constants_t arg) {
 
   for (int ps = 0; ps < kc; ps++) {
-    
+
     int tmp1 = (pc+ps)%arg.RS;
     int c = (pc+ps)/arg.RS;
     int r = tmp1/arg.R;
@@ -66,14 +67,17 @@ void pack_B(float *B_pack, const float *B, int pc, int jc, int kc, constants_t a
 /**
  * Matrix multiplication with implicit im2col.
  */
-void blis(sycl::accessor<float, 1, cl::sycl::access::mode::write> C,
-  const float *A, const float *B, int M, int N, int K, int jc, constants_t arg) {
+void blis(
+  sycl::accessor<float, 1, cl::sycl::access::mode::write> C,
+  sycl::accessor<float, 1, cl::sycl::access::mode::read>  A,
+  sycl::accessor<float, 1, cl::sycl::access::mode::read>  B,
+  int M, int N, int K, int jc, constants_t arg) {
 
-  float B_pack[L1_SIZE];
-  for (int pc = 0; pc < K; pc += L1_SIZE) {
-    int kc = cl::sycl::min(L1_SIZE, K-pc);
+  float B_pack[SIZE];
+  for (int pc = 0; pc < K; pc += SIZE) {
+    int kc = cl::sycl::min(SIZE, K-pc);
 
-    // Pack an entire column of matrix B into B_pack, private and sequential memory
+    // Pack an entire column of matrix B into B_pack, sequential memory
     pack_B(B_pack, B, pc, jc, kc, arg);
 
     // Perform matrix multiplication over the packed memory
@@ -129,7 +133,7 @@ void convolution(dnnl::engine::kind engine_kind) {
         int n = index[2];
 
         int jc = p*arg.QN + q*arg.N + n;
-        blis(y, &f[0], &x[0], K, arg.PQN, arg.CRS, jc, arg);
+        blis(y, f, x, K, arg.PQN, arg.CRS, jc, arg);
 
       });
     });

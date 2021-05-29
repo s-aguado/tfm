@@ -3,8 +3,7 @@
  * blis_sequential.cpp
  * 
  * Implements the gemm-based convolution algorithm in forward propagation mode.
- * Uses the BLIS library to avoid the im2col step. Executes it sequentially in 
- * the CPU, then compares the result with the direct approach.
+ * Reduces the memory consumption avoiding the im2col step.
  */
 
 #include "../utils.hpp"

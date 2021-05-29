@@ -2,10 +2,7 @@
 /**
  * direct_parallel.cpp
  * 
- * Implements the direct convolution algorithm in forward propagation mode. 
- * Executes it in both, the CPU and the offload device, then compares 
- * the result. If the code executes on both CPU and the offload device, 
- * the name of the offload device and a success message are displayed.
+ * Implements the direct convolution algorithm in forward propagation mode.
  */
 
 #include <CL/sycl.hpp>

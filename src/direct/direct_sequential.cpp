@@ -2,8 +2,7 @@
 /**
  * direct_sequential.cpp
  * 
- * Implements the direct convolution algorithm in forward propagation mode. 
- * Executes it sequentially in the CPU.
+ * Implements the direct convolution algorithm in forward propagation mode.
  */
 
 #include "../utils.hpp"

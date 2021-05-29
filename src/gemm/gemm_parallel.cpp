@@ -32,7 +32,7 @@ void convolution(dnnl::engine::kind engine_kind) {
   std::vector<float> x_vec(N*C*H*W);
   std::vector<float> f_vec(K*C*R*S);
   std::vector<float> y_vec(N*K*P*Q);
-  std::vector<float> works(N*C*R*S*P*Q);
+  float* works = new float[N*C*R*S*P*Q];
 
   init_data(x_vec, f_vec, y_vec);
 
@@ -53,7 +53,7 @@ void convolution(dnnl::engine::kind engine_kind) {
     sycl::buffer x_buf(x_vec.data(), sycl::range(N*C*H*W));
     sycl::buffer f_buf(f_vec.data(), sycl::range(K*C*R*S));
     sycl::buffer y_buf(y_vec.data(), sycl::range(N*K*P*Q));
-    sycl::buffer b_buf(works.data(), sycl::range(N*C*R*S*P*Q));
+    sycl::buffer b_buf(works, sycl::range(N*C*R*S*P*Q));
     sycl::buffer args_buf(&constants, sycl::range(1));
 
     // Submit command group to queue to perform im2col
