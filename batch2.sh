@@ -39,7 +39,7 @@ done;
 
 device="gpu";
 
-for executable in "blis_parallel_gpu" "winograd_onednn"; do
+for executable in "winograd_onednn"; do
   for params in\
     "8  2 2 1024 1024 3 3"\
     "16 2 2 1024 1024 3 3"\

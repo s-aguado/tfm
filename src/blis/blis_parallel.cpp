@@ -12,12 +12,7 @@
 #include "dpc_common.hpp"
 #include "../utils.hpp"
 
-#ifdef GPU
-  #define SIZE 32768 //24576 // Intel(R) UHD Graphics P630 [0x3e96]
-#else 
-  #define SIZE 2048  //3072  // Intel(R) Xeon(R) E-2176G CPU @ 3.70GHz
-#endif
-
+#define SIZE 3072
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
 /**

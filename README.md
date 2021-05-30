@@ -52,4 +52,4 @@ Examples:
 3. [Submit a job to the queue](https://devcloud.intel.com/oneapi/documentation/job-submission/)
 4. [Advanced queue management](https://devcloud.intel.com/oneapi/documentation/advanced-queue/)
 
-This repo includes a [script](./job.sh) ready to be launched as a job in DevCloud.
+This repo includes some scripts ready to be launched as jobs in DevCloud.
