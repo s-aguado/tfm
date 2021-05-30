@@ -13,10 +13,12 @@
 #include "../utils.hpp"
 
 #ifdef GPU
-  #define SIZE 49152//24576 // Intel(R) UHD Graphics P630 [0x3e96]
+  #define SIZE 32768 //24576 // Intel(R) UHD Graphics P630 [0x3e96]
 #else 
-  #define SIZE 12288 // Intel(R) Xeon(R) E-2176G CPU @ 3.70GHz
+  #define SIZE 2048  //3072  // Intel(R) Xeon(R) E-2176G CPU @ 3.70GHz
 #endif
+
+#define MIN(a,b) ((a)<(b)?(a):(b))
 
 /**
  * Struct to pass the dimensions to the kernel
@@ -29,13 +31,15 @@ struct constants_t {
 /**
  * Performs a simple matrix multiplication.
  */
-void matmul(sycl::accessor<float, 1, cl::sycl::access::mode::write> C, 
-  const float *A, float *B, int M, int N, int K, int ldb, int ldc, int c_off) {
+void matmul(
+  sycl::accessor<float, 1, cl::sycl::access::mode::write> C, 
+  sycl::accessor<float, 1, cl::sycl::access::mode::read>  A, 
+  float *B, int M, int N, int K, int ldb, int ldc, int a_off, int c_off) {
   
   for (int m = 0; m < M; m++) {
     for (int k = 0; k < K; k++) {
       for (int n = 0; n < N; n++) {
-        C[c_off + m*ldc+n] += A[m*K+k] * B[k*ldb+n];
+        C[c_off + m*ldc+n] += A[a_off + m*K+k] * B[k*ldb+n];
       }
     }
   }
@@ -61,27 +65,6 @@ void pack_B(float *B_pack, sycl::accessor<float, 1, cl::sycl::access::mode::read
     int q = tmp2%arg.P;
 
     B_pack[ps] = B[n*arg.CHW + c*arg.HW + (p+r)*arg.W + (q+s)];
-  }
-}
-
-/**
- * Matrix multiplication with implicit im2col.
- */
-void blis(
-  sycl::accessor<float, 1, cl::sycl::access::mode::write> C,
-  sycl::accessor<float, 1, cl::sycl::access::mode::read>  A,
-  sycl::accessor<float, 1, cl::sycl::access::mode::read>  B,
-  int M, int N, int K, int jc, constants_t arg) {
-
-  float B_pack[SIZE];
-  for (int pc = 0; pc < K; pc += SIZE) {
-    int kc = cl::sycl::min(SIZE, K-pc);
-
-    // Pack an entire column of matrix B into B_pack, sequential memory
-    pack_B(B_pack, B, pc, jc, kc, arg);
-
-    // Perform matrix multiplication over the packed memory
-    matmul(C, &A[pc], B_pack, M, 1, kc, 1, N, jc);
   }
 }
 
@@ -131,10 +114,18 @@ void convolution(dnnl::engine::kind engine_kind) {
         int p = index[0];
         int q = index[1];
         int n = index[2];
-
         int jc = p*arg.QN + q*arg.N + n;
-        blis(y, f, x, K, arg.PQN, arg.CRS, jc, arg);
 
+        float B_pack[SIZE];
+        for (int pc = 0; pc < arg.CRS; pc += SIZE) {
+          int kc = MIN(SIZE, arg.CRS-pc);
+
+          // Pack an entire column of matrix B into B_pack, sequential memory
+          pack_B(B_pack, x, pc, jc, kc, arg);
+
+          // Perform matrix multiplication over the packed memory
+          matmul(y, f, B_pack, arg.K, 1, kc, 1, arg.PQN, pc, jc);
+        }
       });
     });
 
