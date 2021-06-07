@@ -36,7 +36,7 @@ void convolution(dnnl::engine::kind engine_kind) {
 
   init_data(x_vec, f_vec, y_vec);
 
-  try {
+  {
 
     // Initialize the device queue with the custom selector. The device queue is
     // used to enqueue kernels. It encapsulates all states needed for execution.
@@ -107,9 +107,6 @@ void convolution(dnnl::engine::kind engine_kind) {
       });
     });
 
-  } catch (sycl::exception const &e) {
-    std::cout << "An exception was caught during the convolution.\n";
-    std::terminate();
   } // y_vec is updated when y_buf is destroyed upon exiting scope
 
   #ifdef DEBUG // only run the sequential convolution if debugging

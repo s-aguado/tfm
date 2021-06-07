@@ -99,6 +99,9 @@ inline int handle_errors(dnnl::engine::kind engine_kind,
   } catch (std::exception &e) {
     std::cout << "Error in the program: " << e.what() << "." << std::endl;
     exit_code = 2;
+  } catch (sycl::exception &e) {
+    std::cout << "SYCL exception" << std::endl;
+    exit_code = 3;
   }
 
   #ifdef DEBUG

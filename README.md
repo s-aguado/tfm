@@ -32,7 +32,7 @@ Compile the codes:
 After running these commands, the executables should be in the `bin/` folder. All of them share the same interface:
 
 ```bash
-./executable [ (cpu|gpu) [N C K H W R S] ]
+./executable (cpu|gpu) N C K H W R S
 ```
 
 Examples:
