@@ -1,14 +1,12 @@
 ### Batched forward convolution with Intel OneAPI
 
-Code repository for the Master Thesis *Implementación do algoritmo da convolución por lotes usando Intel oneAPI*.
+Code repository for the master thesis *Implementación do algoritmo da convolución por lotes usando Intel oneAPI*.
 
 #### Dependencies
 
 - [Intel oneAPI Base Toolkit](https://software.intel.com/content/www/us/en/develop/tools/oneapi/base-toolkit/download.html?operatingsystem=linux&distributions=webdownload&options=online)
   - Intel oneAPI Deep Neural Network Library (oneDNN)
   - Intel oneAPI DPC++/C++ Compiler
-- [Intel oneAPI HPC Toolkit](https://software.intel.com/content/www/us/en/develop/tools/oneapi/hpc-toolkit/download.html?operatingsystem=linux&distributions=webdownload&options=online)
-  - Intel C++ Compiler Classic (`icc`)
 
 #### Local
 

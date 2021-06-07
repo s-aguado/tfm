@@ -8,7 +8,7 @@
 source /opt/intel/inteloneapi/setvars.sh &> /dev/null
 
 # Build the project
-./build > /dev/null && cd bin/
+cd .. && ./build > /dev/null && cd bin/
 
 # Run the tests
 TIMEFORMAT='%4R';

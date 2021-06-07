@@ -187,7 +187,7 @@ const sycl::device_selector &select_device(dnnl::engine::kind engine_kind) {
   return cpu;
 }
 
-// Multiplies thedimensions to get the total size of the memory object.
+// Multiplies the dimensions to get the total size of the memory object.
 inline dnnl::memory::dim product(const dnnl::memory::dims &dims) {
   return std::accumulate(dims.begin(), dims.end(), (dnnl::memory::dim)1,
     std::multiplies<dnnl::memory::dim>());
