@@ -87,10 +87,10 @@ inline int handle_errors(dnnl::engine::kind engine_kind,
 
   #ifdef DEBUG
     std::cout << "Convolution y(" << N << "·" << K << "·" << P << "·" << Q
-                    << ") = x(" << N << "·" << C << "·" << H << "·" << W
-                    << ") * f(" << K << "·" << C << "·" << R << "·" << S
-                    << ") on " << engine_to_string(engine_kind) << ": "
-                    << (exit_code ? "failed" : "passed") << std::endl;
+                      << ") = x(" << N << "·" << C << "·" << H << "·" << W
+                      << ") * f(" << K << "·" << C << "·" << R << "·" << S
+                      << ") on " << engine_to_string(engine_kind) << ": "
+                      << (exit_code ? "failed" : "passed") << std::endl;
   #endif
 
   return exit_code;

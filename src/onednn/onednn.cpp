@@ -73,10 +73,10 @@ void convolution(dnnl::engine::kind engine_kind) {
   #endif
 
   convolution_forward::desc conv_desc(
-    prop_kind::forward_inference,
-    convolution_algorithm,
-    x_desc, f_desc, b_desc, y_desc,
-    {SH,SW}, {PH_L,PW_L}, {PH_R,PW_R}
+    prop_kind::forward_inference,     // convolution type
+    convolution_algorithm,            // convolution algorithm
+    x_desc, f_desc, b_desc, y_desc,   // memory descriptors
+    {SH,SW}, {PH_L,PW_L}, {PH_R,PW_R} // stride and padding dimensions
   );
   
   // We could indicate additional operations to apply to the result.
