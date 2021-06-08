@@ -9,56 +9,53 @@
  * https://oneapi-src.github.io/oneDNN/dev_guide_convolution.html
  */
 
-#include <algorithm>
-#include <cmath>
-#include <iostream>
-#include <string>
-#include <vector>
-
-#include "oneapi/dnnl/dnnl.hpp"
-#include "dnnl_debug.h"
 #include "../utils.hpp"
-
-using namespace std;
 using namespace dnnl;
 
-using tag = dnnl::memory::format_tag;
-using dt = dnnl::memory::data_type;
+using format = dnnl::memory::format_tag;
+using type = dnnl::memory::data_type;
 
 void convolution(dnnl::engine::kind engine_kind) {
 
+  // Define memory dims
+  dnnl::memory::dims 
+    x_dims = {N,C,H,W},
+    f_dims = {K,C,R,S},
+    y_dims = {N,K,P,Q},
+    b_dims = {K};
+
   // Create execution engine and stream
-  dnnl::engine engine(engine_kind, 0);
-  dnnl::stream stream(engine);
+  engine engine(engine_kind, 0);
+  stream stream(engine);
 
   // Create memory descriptors with format_tag::any for the primitive. This
   // enables the convolution primitive to choose memory layouts for an
   // optimized primitive implementation, and these layouts may differ from the
   // ones provided by the user.
-  auto x_md = memory::desc(x_dims, dt::f32, tag::any);
-  auto f_md = memory::desc(f_dims, dt::f32, tag::any);
-  auto y_md = memory::desc(y_dims, dt::f32, tag::any);
-  auto bias_md = memory::desc(bias_dims, dt::f32, tag::a);
+  memory::desc x_desc(x_dims, type::f32, format::any);
+  memory::desc f_desc(f_dims, type::f32, format::any);
+  memory::desc y_desc(y_dims, type::f32, format::any);
+  memory::desc b_desc(b_dims, type::f32, format::a);
 
   // Forces the fallback to the gemm algorithm indicating the format_tag.
   #ifdef GEMM
-    x_md = memory::desc(x_dims, dt::f32, tag::nchw);
-    f_md = memory::desc(f_dims, dt::f32, tag::oihw);
-    y_md = memory::desc(y_dims, dt::f32, tag::nchw);
+    x_desc = memory::desc(x_dims, type::f32, format::nchw);
+    f_desc = memory::desc(f_dims, type::f32, format::oihw);
+    y_desc = memory::desc(y_dims, type::f32, format::nchw);
   #endif
 
   // Create memory objects = memory descriptors + data. In this example, 
   // NCHW layout is assumed for src and dst, and OIHW for weights.
-  auto x_mem = memory({x_dims, dt::f32, tag::nchw}, engine);
-  auto f_mem = memory({f_dims, dt::f32, tag::oihw}, engine);
-  auto y_mem = memory({y_dims, dt::f32, tag::nchw}, engine);
-  auto bias_mem = memory(bias_md, engine);
+  memory x_mem({x_dims, type::f32, format::nchw}, engine);
+  memory f_mem({f_dims, type::f32, format::oihw}, engine);
+  memory y_mem({y_dims, type::f32, format::nchw}, engine);
+  memory b_mem(b_desc, engine);
 
   // Allocate buffers.
   std::vector<float> x_vec(product(x_dims));
   std::vector<float> f_vec(product(f_dims));
   std::vector<float> y_vec(product(y_dims), 0);
-  std::vector<float> bias_vec(product(bias_dims));
+  std::vector<float> bias_vec(product(b_dims));
 
   // Initialize tensors.
   init_data(x_vec, f_vec, bias_vec);
@@ -66,7 +63,7 @@ void convolution(dnnl::engine::kind engine_kind) {
   // Fill the memory object's handle with the data.
   write_to_dnnl_memory(x_vec.data(), x_mem);
   write_to_dnnl_memory(f_vec.data(), f_mem);
-  write_to_dnnl_memory(bias_vec.data(), bias_mem);
+  write_to_dnnl_memory(bias_vec.data(), b_mem);
 
   // Create operation descriptor.
   #ifdef WINOGRAD
@@ -75,11 +72,11 @@ void convolution(dnnl::engine::kind engine_kind) {
     auto convolution_algorithm = algorithm::convolution_direct;
   #endif
 
-  auto conv_desc = convolution_forward::desc(
+  convolution_forward::desc conv_desc(
     prop_kind::forward_inference,
-    convolution_algorithm, // convolution_winograd | convolution_direct | gemm (fallback)
-    x_md, f_md, bias_md, y_md, 
-    strides_dims, padding_dims_l, padding_dims_r
+    convolution_algorithm,
+    x_desc, f_desc, b_desc, y_desc,
+    {SH,SW}, {PH_L,PW_L}, {PH_R,PW_R}
   );
   
   // We could indicate additional operations to apply to the result.
@@ -91,8 +88,7 @@ void convolution(dnnl::engine::kind engine_kind) {
   //conv_attr.set_post_ops(conv_ops);
 
   // Create primitive descriptor.
-  auto conv_pd
-    = convolution_forward::primitive_desc(conv_desc, conv_attr, engine);
+  convolution_forward::primitive_desc conv_pd(conv_desc, conv_attr, engine);
 
   // For now, assume that the src, weights, and dst memory layouts generated
   // by the primitive and the ones provided by the user are identical.
@@ -122,17 +118,15 @@ void convolution(dnnl::engine::kind engine_kind) {
   }
 
   // Create the primitive.
-  auto conv_prim = convolution_forward(conv_pd);
+  convolution_forward conv_prim(conv_pd);
 
-  // Primitive arguments.
-  std::unordered_map<int, memory> conv_args;
-  conv_args.insert({DNNL_ARG_SRC, conv_x_mem});
-  conv_args.insert({DNNL_ARG_WEIGHTS, conv_f_mem});
-  conv_args.insert({DNNL_ARG_BIAS, bias_mem});
-  conv_args.insert({DNNL_ARG_DST, conv_y_mem});
-
-  // Primitive execution: forward convolution direct algorithm.
-  conv_prim.execute(stream, conv_args); // <----------------------------------    time measurement ?
+  // Execute the primitive.
+  conv_prim.execute(stream, {
+    {DNNL_ARG_SRC, conv_x_mem},
+    {DNNL_ARG_WEIGHTS, conv_f_mem},
+    {DNNL_ARG_BIAS, b_mem},
+    {DNNL_ARG_DST, conv_y_mem}
+  });
 
   // Reorder the data in case the dst memory descriptor generated by the
   // primitive and the one provided by the user are different.

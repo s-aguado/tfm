@@ -8,16 +8,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <algorithm>
-#include <cassert>
-#include <functional>
-#include <iostream>
 #include <numeric>
-#include <stdexcept>
-#include <stdlib.h>
-#include <string>
-#include <initializer_list>
-
 #include "dnnl.hpp"
 #include "dnnl_debug.h"
 
@@ -65,22 +56,12 @@ int
   P = (H - R + PH_L + PH_R) / SH + 1, // output height
   Q = (W - S + PW_L + PW_R) / SW + 1; // output width
 
-// Tensor dimensions.
-dnnl::memory::dims 
-  x_dims = {N, C, H, W},
-  f_dims = {K, C, R, S},
-  y_dims = {N, K, P, Q},
-  bias_dims = {K},
-  strides_dims = {SH, SW},
-  padding_dims_l = {PH_L, PW_L},
-  padding_dims_r = {PH_R, PW_R};
-
 // Returns the string representation of the engine kind.
 inline const std::string engine_to_string(dnnl::engine::kind engine_kind) {
   if (engine_kind == dnnl::engine::kind::cpu) return "CPU";
   if (engine_kind == dnnl::engine::kind::gpu) return "GPU";
   assert(!"not expected");
-  return "<Unknown engine>";
+  return "<unknown engine>";
 }
 
 // Runs example function with signature void() and catches errors.
@@ -158,11 +139,6 @@ inline dnnl::engine::kind parse_arguments(int argc, char **argv) {
     S = atoi(argv[8]);
     P = (H - R + PH_L + PH_R) / SH + 1; // output height
     Q = (W - S + PW_L + PW_R) / SW + 1; // output width
-
-    x_dims = {N, C, H, W};
-    f_dims = {K, C, R, S};
-    y_dims = {N, K, P, Q};
-    bias_dims = {K};
   }
 
   if (argc == 2 || argc == 9) {
