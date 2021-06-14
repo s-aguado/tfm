@@ -2,9 +2,7 @@
 /**
  * gemm_sequential.cpp
  * 
- * Implements the gemm-based convolution algorithm in forward propagation mode. 
- * Executes it sequentially in the CPU, then compares the result with the 
- * direct approach.
+ * Implements the gemm-based convolution algorithm in forward propagation mode.
  */
 
 #include "../utils.hpp"

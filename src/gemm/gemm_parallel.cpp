@@ -2,17 +2,11 @@
 /**
  * gemm_parallel.cpp
  * 
- * Implements the gemm-based convolution algorithm in forward propagation mode. 
- * Executes it in both, the CPU and the offload device, then compares the result 
- * with the direct approach. If the code executes on both CPU and the offload 
- * device, the name of the offload device and a success message are displayed.
+ * Implements the gemm-based convolution algorithm in forward propagation mode.
  */
 
-#include <CL/sycl.hpp>
-#include <iostream>
-
-#include "dpc_common.hpp"
 #include "../utils.hpp"
+#include "dpc_common.hpp"
 
 /**
  * Struct to pass the dimensions to the kernel
@@ -71,8 +65,8 @@ void convolution(dnnl::engine::kind engine_kind) {
         int r = index[2] / arg.S;
         int s = index[2] % arg.S;
 
-        int x_off = c * arg.hw + n * arg.chw;
-        int y_off = c * arg.rs * arg.pq;
+        int x_off = n*arg.chw        + c*arg.hw;
+        int b_off = n*arg.crs*arg.pq + c*arg.rs*arg.pq;
 
         for (int p = 0; p < arg.P; p++) {
           for (int q = 0; q < arg.Q; q++) {
@@ -80,7 +74,7 @@ void convolution(dnnl::engine::kind engine_kind) {
             int h = p + r, row = r*arg.S + s;
             int w = q + s, col = p*arg.Q + q;
 
-            b[y_off + row*arg.pq+col] = x[x_off + h*arg.W+w];
+            b[b_off + row*arg.pq + col] = x[x_off + h*arg.W + w];
           }
         }
       });
@@ -101,8 +95,12 @@ void convolution(dnnl::engine::kind engine_kind) {
         int i = index[1];
         int j = index[2];
 
+        int f_off = i*arg.crs;
+        int b_off = n*arg.crs*arg.pq;
+        int y_off = n*arg.kpq + i*arg.pq + j;
+        
         for (int k = 0; k < arg.crs; k++) {
-          y[n*arg.kpq + i*arg.pq+j] += f[i*arg.crs+k] * b[k*arg.pq+j];
+          y[y_off] += f[f_off + k] * b[b_off + k*arg.pq + j];
         }
       });
     });

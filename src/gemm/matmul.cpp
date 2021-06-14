@@ -5,10 +5,6 @@
  * Executes the matrix multiplication in standalone mode.
  */
 
-#include <CL/sycl.hpp>
-#include <iostream>
-
-#include "dpc_common.hpp"
 #include "../utils.hpp"
 
 /**

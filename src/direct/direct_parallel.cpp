@@ -5,11 +5,8 @@
  * Implements the direct convolution algorithm in forward propagation mode.
  */
 
-#include <CL/sycl.hpp>
-#include <iostream>
-
-#include "dpc_common.hpp"
 #include "../utils.hpp"
+#include "dpc_common.hpp"
 
 /**
  * Struct to pass the dimensions to the kernel

@@ -1,8 +1,15 @@
-#include <CL/sycl.hpp>
-#include <iostream>
-#define N 8
 
+/**
+ * hello.cpp
+ * 
+ * Simple usage example of the SYCL/DPC++ API using
+ * buffers to access to the host/device memory.
+ */
+
+#include <CL/sycl.hpp>
 using namespace sycl;
+
+#define N 8
 
 int main() {
 

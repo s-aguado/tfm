@@ -6,11 +6,8 @@
  * Reduces the memory consumption avoiding the im2col step.
  */
 
-#include <CL/sycl.hpp>
-#include <iostream>
-
-#include "dpc_common.hpp"
 #include "../utils.hpp"
+#include "dpc_common.hpp"
 
 #define SIZE 3072
 #define MIN(a,b) ((a)<(b)?(a):(b))

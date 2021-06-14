@@ -1,8 +1,15 @@
-#include <CL/sycl.hpp>
-#include <iostream>
-#define N 8
 
+/**
+ * usm_explicit.cpp
+ * 
+ * Simple usage example of the SYCL/DPC++ API using the USM to 
+ * make explicit transferences among the host/device memories.
+ */
+
+#include <CL/sycl.hpp>
 using namespace sycl;
+
+#define N 8
 
 int main() {
 
