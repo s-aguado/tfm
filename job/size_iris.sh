@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N size_iris
-#PBS -l walltime=00:15:00
+#PBS -l walltime=01:00:00
 #PBS -l nodes=1:iris_xe_max:ppn=2
 #PBS -d .
 
