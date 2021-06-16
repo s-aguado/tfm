@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N size4
+#PBS -N size_p630
 #PBS -l walltime=00:45:00
 #PBS -l nodes=1:gpu:ppn=2
 #PBS -d .
