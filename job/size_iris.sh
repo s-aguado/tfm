@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N size_iris
-#PBS -l walltime=01:00:00
+#PBS -l walltime=02:00:00
 #PBS -l nodes=1:iris_xe_max:ppn=2
 #PBS -d .
 
@@ -25,8 +25,7 @@ for executable in "direct_parallel" "gemm_parallel" "blis_parallel"\
     "8 4 4  512  512 3 3"\
     "8 4 4 1024 1024 3 3"\
     "8 4 4 2048 2048 3 3"\
-    "8 4 4 4096 4096 3 3"\
-    "8 4 4 8192 8192 3 3"
+    "8 4 4 4096 4096 3 3"
   do
     printf "${executable},${device},${params}"
     for i in {1..4}; do

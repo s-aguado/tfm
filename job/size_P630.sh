@@ -24,8 +24,7 @@ for executable in "direct_sequential" "gemm_sequential" "blis_sequential" "im2co
     "8 4 4 512 512 3 3"\
     "8 4 4 1024 1024 3 3"\
     "8 4 4 2048 2048 3 3"\
-    "8 4 4 4096 4096 3 3"\
-    "8 4 4 8192 8192 3 3"
+    "8 4 4 4096 4096 3 3"
   do
     printf "${executable},${device},${params}"
     for i in {1..4}; do
@@ -45,8 +44,7 @@ for executable in "winograd_onednn"; do
     "8 4 4 512 512 3 3"\
     "8 4 4 1024 1024 3 3"\
     "8 4 4 2048 2048 3 3"\
-    "8 4 4 4096 4096 3 3"\
-    "8 4 4 8192 8192 3 3"   
+    "8 4 4 4096 4096 3 3"   
   do
     printf "${executable},${device},${params}"
     for i in {1..4}; do
@@ -65,8 +63,7 @@ for executable in "direct_onednn" "gemm_onednn" "direct_parallel" "gemm_parallel
       "8 4 4 512 512 3 3"\
       "8 4 4 1024 1024 3 3"\
       "8 4 4 2048 2048 3 3"\
-      "8 4 4 4096 4096 3 3"\
-      "8 4 4 8192 8192 3 3"
+      "8 4 4 4096 4096 3 3"
     do
       printf "${executable},${device},${params}"
       for i in {1..4}; do

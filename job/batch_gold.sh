@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N batch_gold
-#PBS -l walltime=01:00:00
+#PBS -l walltime=02:00:00
 #PBS -l nodes=1:gold6128:ppn=2
 #PBS -d .
 
@@ -16,9 +16,10 @@ echo "executable,device,parameters,time1,time2,time3,time4";
 
 device="cpu";
 
-for executable in "direct_sequential" "gemm_sequential" "blis_sequential"\
+for executable in "im2col" "matmul"\
+                  "direct_sequential" "gemm_sequential" "blis_sequential"\
                   "direct_parallel" "gemm_parallel" "blis_parallel"\
-                  "direct_onednn" "gemm_onednn" "im2col" "matmul"; do
+                  "direct_onednn" "gemm_onednn"; do
   for params in\
     "8  4 4 1024 1024 3 3"\
     "16 4 4 1024 1024 3 3"\
