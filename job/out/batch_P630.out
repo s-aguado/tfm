@@ -7,6 +7,26 @@
 ########################################################################
 
 executable,device,parameters,time1,time2,time3,time4
+im2col,cpu,8 4 4 1024 1024 3 3,0.324,0.315,0.315,0.315
+im2col,cpu,16 4 4 1024 1024 3 3,0.522,0.542,0.524,0.539
+im2col,cpu,24 4 4 1024 1024 3 3,0.735,0.732,0.737,0.734
+im2col,cpu,32 4 4 1024 1024 3 3,0.949,0.950,0.944,0.949
+im2col,cpu,40 4 4 1024 1024 3 3,1.158,1.158,1.158,1.164
+im2col,cpu,48 4 4 1024 1024 3 3,1.372,1.366,1.381,1.367
+im2col,cpu,56 4 4 1024 1024 3 3,1.591,1.590,1.589,1.584
+im2col,cpu,64 4 4 1024 1024 3 3,1.792,1.790,1.797,1.801
+im2col,cpu,72 4 4 1024 1024 3 3,2.012,2.004,2.014,2.046
+im2col,cpu,80 4 4 1024 1024 3 3,2.240,2.227,2.219,2.218
+matmul,cpu,8 4 4 1024 1024 3 3,0.590,0.568,0.587,0.568
+matmul,cpu,16 4 4 1024 1024 3 3,0.957,0.957,0.992,0.979
+matmul,cpu,24 4 4 1024 1024 3 3,1.358,1.371,1.362,1.361
+matmul,cpu,32 4 4 1024 1024 3 3,1.757,1.755,1.729,1.752
+matmul,cpu,40 4 4 1024 1024 3 3,2.154,2.119,2.176,2.130
+matmul,cpu,48 4 4 1024 1024 3 3,2.552,2.516,2.555,2.543
+matmul,cpu,56 4 4 1024 1024 3 3,2.987,2.905,2.951,2.907
+matmul,cpu,64 4 4 1024 1024 3 3,3.347,3.352,3.296,3.352
+matmul,cpu,72 4 4 1024 1024 3 3,3.729,3.690,3.794,3.708
+matmul,cpu,80 4 4 1024 1024 3 3,4.151,4.189,4.188,4.129
 direct_sequential,cpu,8 4 4 1024 1024 3 3,3.048,1.793,1.781,1.777
 direct_sequential,cpu,16 4 4 1024 1024 3 3,3.512,3.531,3.511,3.525
 direct_sequential,cpu,24 4 4 1024 1024 3 3,5.239,5.262,5.316,5.233
@@ -37,148 +57,6 @@ blis_sequential,cpu,56 4 4 1024 1024 3 3,15.118,15.125,15.075,15.089
 blis_sequential,cpu,64 4 4 1024 1024 3 3,17.330,17.367,17.238,17.271
 blis_sequential,cpu,72 4 4 1024 1024 3 3,19.598,19.455,19.441,19.381
 blis_sequential,cpu,80 4 4 1024 1024 3 3,21.552,21.653,21.508,21.647
-im2col,cpu,8 4 4 1024 1024 3 3,0.324,0.315,0.315,0.315
-im2col,cpu,16 4 4 1024 1024 3 3,0.522,0.542,0.524,0.539
-im2col,cpu,24 4 4 1024 1024 3 3,0.735,0.732,0.737,0.734
-im2col,cpu,32 4 4 1024 1024 3 3,0.949,0.950,0.944,0.949
-im2col,cpu,40 4 4 1024 1024 3 3,1.158,1.158,1.158,1.164
-im2col,cpu,48 4 4 1024 1024 3 3,1.372,1.366,1.381,1.367
-im2col,cpu,56 4 4 1024 1024 3 3,1.591,1.590,1.589,1.584
-im2col,cpu,64 4 4 1024 1024 3 3,1.792,1.790,1.797,1.801
-im2col,cpu,72 4 4 1024 1024 3 3,2.012,2.004,2.014,2.046
-im2col,cpu,80 4 4 1024 1024 3 3,2.240,2.227,2.219,2.218
-matmul,cpu,8 4 4 1024 1024 3 3,0.590,0.568,0.587,0.568
-matmul,cpu,16 4 4 1024 1024 3 3,0.957,0.957,0.992,0.979
-matmul,cpu,24 4 4 1024 1024 3 3,1.358,1.371,1.362,1.361
-matmul,cpu,32 4 4 1024 1024 3 3,1.757,1.755,1.729,1.752
-matmul,cpu,40 4 4 1024 1024 3 3,2.154,2.119,2.176,2.130
-matmul,cpu,48 4 4 1024 1024 3 3,2.552,2.516,2.555,2.543
-matmul,cpu,56 4 4 1024 1024 3 3,2.987,2.905,2.951,2.907
-matmul,cpu,64 4 4 1024 1024 3 3,3.347,3.352,3.296,3.352
-matmul,cpu,72 4 4 1024 1024 3 3,3.729,3.690,3.794,3.708
-matmul,cpu,80 4 4 1024 1024 3 3,4.151,4.189,4.188,4.129
-winograd_onednn,gpu,8 4 4 1024 1024 3 3,2.334,1.903,1.887,1.878
-winograd_onednn,gpu,16 4 4 1024 1024 3 3,2.588,2.558,2.586,2.599
-winograd_onednn,gpu,24 4 4 1024 1024 3 3,3.098,3.113,3.066,3.093
-winograd_onednn,gpu,32 4 4 1024 1024 3 3,3.733,3.747,3.751,3.731
-winograd_onednn,gpu,40 4 4 1024 1024 3 3,4.141,4.104,4.129,4.135
-winograd_onednn,gpu,48 4 4 1024 1024 3 3,4.995,5.021,4.923,5.013
-winograd_onednn,gpu,56 4 4 1024 1024 3 3,5.428,5.496,5.449,5.499
-winograd_onednn,gpu,64 4 4 1024 1024 3 3,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-1.953,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-1.959,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-1.958,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-1.942
-winograd_onednn,gpu,72 4 4 1024 1024 3 3,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.162,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.187,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.158,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.173
-winograd_onednn,gpu,80 4 4 1024 1024 3 3,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.352,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.368,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.374,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.363
-direct_onednn,cpu,8 4 4 1024 1024 3 3,2.107,0.429,0.424,0.438
-direct_onednn,cpu,16 4 4 1024 1024 3 3,0.679,0.711,0.694,0.708
-direct_onednn,cpu,24 4 4 1024 1024 3 3,0.979,1.004,0.954,0.984
-direct_onednn,cpu,32 4 4 1024 1024 3 3,1.233,1.202,1.233,1.234
-direct_onednn,cpu,40 4 4 1024 1024 3 3,1.533,1.525,1.523,1.571
-direct_onednn,cpu,48 4 4 1024 1024 3 3,1.785,1.798,1.785,1.789
-direct_onednn,cpu,56 4 4 1024 1024 3 3,2.014,2.082,2.065,2.076
-direct_onednn,cpu,64 4 4 1024 1024 3 3,2.356,2.355,2.332,2.342
-direct_onednn,cpu,72 4 4 1024 1024 3 3,2.637,2.613,2.599,2.586
-direct_onednn,cpu,80 4 4 1024 1024 3 3,2.903,2.919,2.855,2.882
-direct_onednn,gpu,8 4 4 1024 1024 3 3,2.008,1.959,1.962,1.968
-direct_onednn,gpu,16 4 4 1024 1024 3 3,2.616,2.643,2.628,2.649
-direct_onednn,gpu,24 4 4 1024 1024 3 3,3.242,3.240,3.289,3.255
-direct_onednn,gpu,32 4 4 1024 1024 3 3,3.823,3.793,3.779,3.808
-direct_onednn,gpu,40 4 4 1024 1024 3 3,4.106,4.100,4.114,4.113
-direct_onednn,gpu,48 4 4 1024 1024 3 3,4.726,4.686,4.715,4.711
-direct_onednn,gpu,56 4 4 1024 1024 3 3,5.002,5.042,5.037,5.034
-direct_onednn,gpu,64 4 4 1024 1024 3 3,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-1.946,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-1.953,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-1.956,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-1.966
-direct_onednn,gpu,72 4 4 1024 1024 3 3,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.153,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.162,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.154,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.164
-direct_onednn,gpu,80 4 4 1024 1024 3 3,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.364,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.415,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.365,oneDNN error caught: 
-	Status: out_of_memory
-	Message: could not create a memory object
-2.354
-gemm_onednn,cpu,8 4 4 1024 1024 3 3,0.544,0.457,0.466,0.469
-gemm_onednn,cpu,16 4 4 1024 1024 3 3,0.737,0.762,0.744,0.841
-gemm_onednn,cpu,24 4 4 1024 1024 3 3,1.066,1.061,1.037,1.054
-gemm_onednn,cpu,32 4 4 1024 1024 3 3,1.354,1.343,1.376,1.369
-gemm_onednn,cpu,40 4 4 1024 1024 3 3,1.647,1.632,1.634,1.650
-gemm_onednn,cpu,48 4 4 1024 1024 3 3,1.929,1.921,2.000,1.952
-gemm_onednn,cpu,56 4 4 1024 1024 3 3,2.267,2.209,2.246,2.224
-gemm_onednn,cpu,64 4 4 1024 1024 3 3,2.523,2.484,2.588,2.525
-gemm_onednn,cpu,72 4 4 1024 1024 3 3,2.849,2.766,2.824,2.837
-gemm_onednn,cpu,80 4 4 1024 1024 3 3,3.111,3.152,3.096,3.133
-gemm_onednn,gpu,8 4 4 1024 1024 3 3,0.851,0.867,0.871,0.867
-gemm_onednn,gpu,16 4 4 1024 1024 3 3,1.146,1.161,1.156,1.154
-gemm_onednn,gpu,24 4 4 1024 1024 3 3,1.464,1.471,1.472,1.483
-gemm_onednn,gpu,32 4 4 1024 1024 3 3,1.767,1.755,1.745,1.746
-gemm_onednn,gpu,40 4 4 1024 1024 3 3,2.057,2.055,2.054,2.041
-gemm_onednn,gpu,48 4 4 1024 1024 3 3,2.346,2.334,2.356,2.355
-gemm_onednn,gpu,56 4 4 1024 1024 3 3,2.651,2.678,2.648,2.668
-gemm_onednn,gpu,64 4 4 1024 1024 3 3,2.936,3.017,2.928,2.937
-gemm_onednn,gpu,72 4 4 1024 1024 3 3,3.256,3.225,3.232,3.225
-gemm_onednn,gpu,80 4 4 1024 1024 3 3,3.532,3.521,3.475,3.569
 direct_parallel,cpu,8 4 4 1024 1024 3 3,0.802,0.647,0.648,0.622
 direct_parallel,cpu,16 4 4 1024 1024 3 3,1.072,1.073,1.070,1.062
 direct_parallel,cpu,24 4 4 1024 1024 3 3,1.506,1.498,1.533,1.523
@@ -189,16 +67,6 @@ direct_parallel,cpu,56 4 4 1024 1024 3 3,3.242,3.258,3.223,3.242
 direct_parallel,cpu,64 4 4 1024 1024 3 3,3.671,3.650,3.695,3.666
 direct_parallel,cpu,72 4 4 1024 1024 3 3,4.115,4.107,4.133,4.203
 direct_parallel,cpu,80 4 4 1024 1024 3 3,4.533,4.545,4.521,4.544
-direct_parallel,gpu,8 4 4 1024 1024 3 3,0.700,0.698,0.722,0.706
-direct_parallel,gpu,16 4 4 1024 1024 3 3,1.174,1.174,1.187,1.170
-direct_parallel,gpu,24 4 4 1024 1024 3 3,1.670,1.686,1.679,1.679
-direct_parallel,gpu,32 4 4 1024 1024 3 3,2.112,2.131,2.132,2.132
-direct_parallel,gpu,40 4 4 1024 1024 3 3,2.623,2.626,2.632,2.595
-direct_parallel,gpu,48 4 4 1024 1024 3 3,3.045,3.128,3.104,3.094
-direct_parallel,gpu,56 4 4 1024 1024 3 3,3.599,3.532,3.574,3.579
-direct_parallel,gpu,64 4 4 1024 1024 3 3,4.023,3.998,4.038,4.027
-direct_parallel,gpu,72 4 4 1024 1024 3 3,4.544,4.469,4.530,4.538
-direct_parallel,gpu,80 4 4 1024 1024 3 3,4.984,5.018,4.961,4.975
 gemm_parallel,cpu,8 4 4 1024 1024 3 3,0.538,0.548,0.553,0.550
 gemm_parallel,cpu,16 4 4 1024 1024 3 3,0.834,0.822,0.852,0.912
 gemm_parallel,cpu,24 4 4 1024 1024 3 3,1.222,1.176,1.250,1.185
@@ -206,75 +74,9 @@ gemm_parallel,cpu,32 4 4 1024 1024 3 3,1.510,1.516,1.465,1.507
 gemm_parallel,cpu,40 4 4 1024 1024 3 3,1.823,1.922,1.924,1.875
 gemm_parallel,cpu,48 4 4 1024 1024 3 3,2.135,2.171,2.205,2.226
 gemm_parallel,cpu,56 4 4 1024 1024 3 3,2.597,2.561,2.556,2.556
-gemm_parallel,cpu,64 4 4 1024 1024 3 3,Error in the program: std::bad_alloc.
-0.739,Error in the program: std::bad_alloc.
-0.733,Error in the program: std::bad_alloc.
-0.734,Error in the program: std::bad_alloc.
-0.772
-gemm_parallel,cpu,72 4 4 1024 1024 3 3,Error in the program: std::bad_alloc.
-0.856,Error in the program: std::bad_alloc.
-0.821,Error in the program: std::bad_alloc.
-0.818,Error in the program: std::bad_alloc.
-0.821
-gemm_parallel,cpu,80 4 4 1024 1024 3 3,Error in the program: std::bad_alloc.
-0.910,Error in the program: std::bad_alloc.
-0.908,Error in the program: std::bad_alloc.
-0.903,Error in the program: std::bad_alloc.
-0.901
-gemm_parallel,gpu,8 4 4 1024 1024 3 3,1.673,1.652,1.654,1.685
-gemm_parallel,gpu,16 4 4 1024 1024 3 3,2.911,2.943,2.902,2.900
-gemm_parallel,gpu,24 4 4 1024 1024 3 3,4.221,4.208,4.263,4.210
-gemm_parallel,gpu,32 4 4 1024 1024 3 3,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-0.838,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-0.839,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-0.841,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-0.845
-gemm_parallel,gpu,40 4 4 1024 1024 3 3,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.035,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.037,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.042,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.036
-gemm_parallel,gpu,48 4 4 1024 1024 3 3,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.234,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.234,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.235,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.235
-gemm_parallel,gpu,56 4 4 1024 1024 3 3,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.436,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.436,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.436,terminate called after throwing an instance of 'cl::sycl::runtime_error'
-  what():  Native API failed. Native API returns: -30 (CL_INVALID_VALUE) -30 (CL_INVALID_VALUE)
-1.436
-gemm_parallel,gpu,64 4 4 1024 1024 3 3,Error in the program: std::bad_alloc.
-0.787,Error in the program: std::bad_alloc.
-0.752,Error in the program: std::bad_alloc.
-0.731,Error in the program: std::bad_alloc.
-0.735
-gemm_parallel,gpu,72 4 4 1024 1024 3 3,Error in the program: std::bad_alloc.
-0.832,Error in the program: std::bad_alloc.
-0.817,Error in the program: std::bad_alloc.
-0.834,Error in the program: std::bad_alloc.
-0.824
-gemm_parallel,gpu,80 4 4 1024 1024 3 3,Error in the program: std::bad_alloc.
-0.906,Error in the program: std::bad_alloc.
-0.904,Error in the program: std::bad_alloc.
-0.902,Error in the program: std::bad_alloc.
-0.913
+gemm_parallel,cpu,64 4 4 1024 1024 3 3,,,,
+gemm_parallel,cpu,72 4 4 1024 1024 3 3,,,,
+gemm_parallel,cpu,80 4 4 1024 1024 3 3,,,,
 blis_parallel,cpu,8 4 4 1024 1024 3 3,0.622,0.634,0.621,0.638
 blis_parallel,cpu,16 4 4 1024 1024 3 3,0.936,0.967,0.931,0.944
 blis_parallel,cpu,24 4 4 1024 1024 3 3,1.281,1.293,1.290,1.261
@@ -285,6 +87,46 @@ blis_parallel,cpu,56 4 4 1024 1024 3 3,2.577,2.582,2.599,2.563
 blis_parallel,cpu,64 4 4 1024 1024 3 3,2.913,2.971,2.985,2.896
 blis_parallel,cpu,72 4 4 1024 1024 3 3,3.215,3.228,3.243,3.207
 blis_parallel,cpu,80 4 4 1024 1024 3 3,3.552,3.540,3.559,3.538
+direct_onednn,cpu,8 4 4 1024 1024 3 3,2.107,0.429,0.424,0.438
+direct_onednn,cpu,16 4 4 1024 1024 3 3,0.679,0.711,0.694,0.708
+direct_onednn,cpu,24 4 4 1024 1024 3 3,0.979,1.004,0.954,0.984
+direct_onednn,cpu,32 4 4 1024 1024 3 3,1.233,1.202,1.233,1.234
+direct_onednn,cpu,40 4 4 1024 1024 3 3,1.533,1.525,1.523,1.571
+direct_onednn,cpu,48 4 4 1024 1024 3 3,1.785,1.798,1.785,1.789
+direct_onednn,cpu,56 4 4 1024 1024 3 3,2.014,2.082,2.065,2.076
+direct_onednn,cpu,64 4 4 1024 1024 3 3,2.356,2.355,2.332,2.342
+direct_onednn,cpu,72 4 4 1024 1024 3 3,2.637,2.613,2.599,2.586
+direct_onednn,cpu,80 4 4 1024 1024 3 3,2.903,2.919,2.855,2.882
+gemm_onednn,cpu,8 4 4 1024 1024 3 3,0.544,0.457,0.466,0.469
+gemm_onednn,cpu,16 4 4 1024 1024 3 3,0.737,0.762,0.744,0.841
+gemm_onednn,cpu,24 4 4 1024 1024 3 3,1.066,1.061,1.037,1.054
+gemm_onednn,cpu,32 4 4 1024 1024 3 3,1.354,1.343,1.376,1.369
+gemm_onednn,cpu,40 4 4 1024 1024 3 3,1.647,1.632,1.634,1.650
+gemm_onednn,cpu,48 4 4 1024 1024 3 3,1.929,1.921,2.000,1.952
+gemm_onednn,cpu,56 4 4 1024 1024 3 3,2.267,2.209,2.246,2.224
+gemm_onednn,cpu,64 4 4 1024 1024 3 3,2.523,2.484,2.588,2.525
+gemm_onednn,cpu,72 4 4 1024 1024 3 3,2.849,2.766,2.824,2.837
+gemm_onednn,cpu,80 4 4 1024 1024 3 3,3.111,3.152,3.096,3.133
+direct_parallel,gpu,8 4 4 1024 1024 3 3,0.700,0.698,0.722,0.706
+direct_parallel,gpu,16 4 4 1024 1024 3 3,1.174,1.174,1.187,1.170
+direct_parallel,gpu,24 4 4 1024 1024 3 3,1.670,1.686,1.679,1.679
+direct_parallel,gpu,32 4 4 1024 1024 3 3,2.112,2.131,2.132,2.132
+direct_parallel,gpu,40 4 4 1024 1024 3 3,2.623,2.626,2.632,2.595
+direct_parallel,gpu,48 4 4 1024 1024 3 3,3.045,3.128,3.104,3.094
+direct_parallel,gpu,56 4 4 1024 1024 3 3,3.599,3.532,3.574,3.579
+direct_parallel,gpu,64 4 4 1024 1024 3 3,4.023,3.998,4.038,4.027
+direct_parallel,gpu,72 4 4 1024 1024 3 3,4.544,4.469,4.530,4.538
+direct_parallel,gpu,80 4 4 1024 1024 3 3,4.984,5.018,4.961,4.975
+gemm_parallel,gpu,8 4 4 1024 1024 3 3,1.673,1.652,1.654,1.685
+gemm_parallel,gpu,16 4 4 1024 1024 3 3,2.911,2.943,2.902,2.900
+gemm_parallel,gpu,24 4 4 1024 1024 3 3,4.221,4.208,4.263,4.210
+gemm_parallel,gpu,32 4 4 1024 1024 3 3,,,,
+gemm_parallel,gpu,40 4 4 1024 1024 3 3,,,,
+gemm_parallel,gpu,48 4 4 1024 1024 3 3,,,,
+gemm_parallel,gpu,56 4 4 1024 1024 3 3,,,,
+gemm_parallel,gpu,64 4 4 1024 1024 3 3,,,,
+gemm_parallel,gpu,72 4 4 1024 1024 3 3,,,,
+gemm_parallel,gpu,80 4 4 1024 1024 3 3,,,,
 blis_parallel,gpu,8 4 4 1024 1024 3 3,0.591,0.594,0.587,0.595
 blis_parallel,gpu,16 4 4 1024 1024 3 3,0.945,0.947,0.924,0.928
 blis_parallel,gpu,24 4 4 1024 1024 3 3,1.331,1.308,1.300,1.308
@@ -295,9 +137,38 @@ blis_parallel,gpu,56 4 4 1024 1024 3 3,2.765,2.740,2.746,2.717
 blis_parallel,gpu,64 4 4 1024 1024 3 3,2.861,2.863,2.907,2.881
 blis_parallel,gpu,72 4 4 1024 1024 3 3,3.479,3.423,3.419,3.490
 blis_parallel,gpu,80 4 4 1024 1024 3 3,3.573,3.563,3.536,3.547
+direct_onednn,gpu,8 4 4 1024 1024 3 3,2.008,1.959,1.962,1.968
+direct_onednn,gpu,16 4 4 1024 1024 3 3,2.616,2.643,2.628,2.649
+direct_onednn,gpu,24 4 4 1024 1024 3 3,3.242,3.240,3.289,3.255
+direct_onednn,gpu,32 4 4 1024 1024 3 3,3.823,3.793,3.779,3.808
+direct_onednn,gpu,40 4 4 1024 1024 3 3,4.106,4.100,4.114,4.113
+direct_onednn,gpu,48 4 4 1024 1024 3 3,4.726,4.686,4.715,4.711
+direct_onednn,gpu,56 4 4 1024 1024 3 3,5.002,5.042,5.037,5.034
+direct_onednn,gpu,64 4 4 1024 1024 3 3,,,,
+direct_onednn,gpu,72 4 4 1024 1024 3 3,,,,
+direct_onednn,gpu,80 4 4 1024 1024 3 3,,,,
+gemm_onednn,gpu,8 4 4 1024 1024 3 3,0.851,0.867,0.871,0.867
+gemm_onednn,gpu,16 4 4 1024 1024 3 3,1.146,1.161,1.156,1.154
+gemm_onednn,gpu,24 4 4 1024 1024 3 3,1.464,1.471,1.472,1.483
+gemm_onednn,gpu,32 4 4 1024 1024 3 3,1.767,1.755,1.745,1.746
+gemm_onednn,gpu,40 4 4 1024 1024 3 3,2.057,2.055,2.054,2.041
+gemm_onednn,gpu,48 4 4 1024 1024 3 3,2.346,2.334,2.356,2.355
+gemm_onednn,gpu,56 4 4 1024 1024 3 3,2.651,2.678,2.648,2.668
+gemm_onednn,gpu,64 4 4 1024 1024 3 3,2.936,3.017,2.928,2.937
+gemm_onednn,gpu,72 4 4 1024 1024 3 3,3.256,3.225,3.232,3.225
+gemm_onednn,gpu,80 4 4 1024 1024 3 3,3.532,3.521,3.475,3.569
+winograd_onednn,gpu,8 4 4 1024 1024 3 3,2.334,1.903,1.887,1.878
+winograd_onednn,gpu,16 4 4 1024 1024 3 3,2.588,2.558,2.586,2.599
+winograd_onednn,gpu,24 4 4 1024 1024 3 3,3.098,3.113,3.066,3.093
+winograd_onednn,gpu,32 4 4 1024 1024 3 3,3.733,3.747,3.751,3.731
+winograd_onednn,gpu,40 4 4 1024 1024 3 3,4.141,4.104,4.129,4.135
+winograd_onednn,gpu,48 4 4 1024 1024 3 3,4.995,5.021,4.923,5.013
+winograd_onednn,gpu,56 4 4 1024 1024 3 3,5.428,5.496,5.449,5.499
+winograd_onednn,gpu,64 4 4 1024 1024 3 3,,,,
+winograd_onednn,gpu,72 4 4 1024 1024 3 3,,,,
+winograd_onednn,gpu,80 4 4 1024 1024 3 3,,,,
 
 ########################################################################
 # End of output for job 881046.v-qsvr-1.aidevcloud
 # Date: Sun 30 May 2021 05:13:01 AM PDT
 ########################################################################
-

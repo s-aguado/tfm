@@ -1,7 +1,6 @@
 #!/bin/bash
 #PBS -N size_iris
-#PBS -l walltime=02:00:00
-#PBS -l nodes=1:iris_xe_max:ppn=2
+#PBS -l nodes=1:iris_xe_max:dual_gpu:ppn=2
 #PBS -d .
 
 # Set the environment
@@ -19,10 +18,10 @@ device="gpu";
 for executable in "direct_parallel" "gemm_parallel" "blis_parallel"\
                   "direct_onednn" "gemm_onednn" "winograd_onednn"; do
   for params in\
-    "8 4 4   64   64 3 3"\
-    "8 4 4  128  128 3 3"\
-    "8 4 4  256  256 3 3"\
-    "8 4 4  512  512 3 3"\
+    "8 4 4 64 64 3 3"\
+    "8 4 4 128 128 3 3"\
+    "8 4 4 256 256 3 3"\
+    "8 4 4 512 512 3 3"\
     "8 4 4 1024 1024 3 3"\
     "8 4 4 2048 2048 3 3"\
     "8 4 4 4096 4096 3 3"

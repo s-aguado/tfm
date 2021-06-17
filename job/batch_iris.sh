@@ -1,7 +1,6 @@
 #!/bin/bash
 #PBS -N batch_iris
-#PBS -l walltime=02:00:00
-#PBS -l nodes=1:iris_xe_max:ppn=2
+#PBS -l nodes=1:iris_xe_max:dual_gpu:ppn=2
 #PBS -d .
 
 # Set the environment

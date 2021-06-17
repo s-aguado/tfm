@@ -1,6 +1,5 @@
 #!/bin/bash
 #PBS -N size_p630
-#PBS -l walltime=00:45:00
 #PBS -l nodes=1:gpu:ppn=2
 #PBS -d .
 
@@ -73,3 +72,5 @@ for executable in "direct_onednn" "gemm_onednn" "direct_parallel" "gemm_parallel
     done;
   done;
 done;
+
+# xeon,cfl,e-2176g,ram64gb,net1gbe,gpu,gen9

@@ -1,6 +1,5 @@
 #!/bin/bash
 #PBS -N batch_gold
-#PBS -l walltime=02:00:00
 #PBS -l nodes=1:gold6128:ppn=2
 #PBS -d .
 
